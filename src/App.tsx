@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { TopBanner } from './components/TopBanner';
+import { useNavigate } from "react-router-dom";
 import { HeroSection } from './components/HeroSection';
 import { FeaturesSection } from './components/FeaturesSection';
 import { ProductSection } from './components/ProductSection';
@@ -11,26 +12,35 @@ import { FAQSection } from './components/FAQSection';
 import { Footer } from './components/Footer';
 import { LoginModal } from './components/LoginModal';
 import { CheckoutPage } from './components/CheckoutPage';
-import { PaymentGatewayPage } from './components/PaymentGatewayPage';
-import { PartnerDashboard } from './components/PartnerDashboard';
-import { AdminDashboard } from './components/AdminDashboard';
+import { HowItWorksSection } from './components/HowitWorks';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { PaymentSuccess } from "./components/PaymentSuccess";
+import { PartnerDashboard } from "./components/PartnerDashboard";
+import { AdminDashboard } from "./components/AdminDashboard";
 
-type ViewState = 'landing' | 'checkout' | 'payment' | 'dashboard';
+type ViewState = 'landing' | 'checkout' | 'dashboard';
 
 export default function App() {
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<ViewState>('landing');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
-    name: string;
-    price: string;
-    period: string;
-  } | null>(null);
+  licenseId: string;
+  name: string;
+  price: string;
+  period: string;
+} | null>(null);
   const [currentUser, setCurrentUser] = useState<{
     type: 'partner' | 'admin' | null;
     name: string;
   } | null>(null);
 
-  const handlePlanSelect = (plan: { name: string; price: string; period: string }) => {
+  const handlePlanSelect = (plan: {
+    licenseId: string;
+    name: string;
+    price: string;
+    period: string;
+  }) => {
     setSelectedPlan(plan);
     setIsLoginModalOpen(true);
   };
@@ -40,7 +50,7 @@ export default function App() {
     
     // If a plan was selected, show checkout page
     if (selectedPlan) {
-      setCurrentView('checkout');
+      navigate("/checkout");
     } else {
       // Otherwise go directly to dashboard
       setCurrentUser({ type, name });
@@ -48,8 +58,8 @@ export default function App() {
     }
   };
 
-  const handlePaymentComplete = () => {
-    setCurrentView('payment');
+  const handlePaymentComplete = (_email: string) => {
+    setCurrentView('dashboard');
   };
 
   const handlePaymentSuccess = () => {
@@ -69,59 +79,80 @@ export default function App() {
     setSelectedPlan(null);
   };
 
-  // Show checkout page
-  if (currentView === 'checkout' && selectedPlan) {
-    return (
-      <CheckoutPage
-        selectedPlan={selectedPlan}
-        onPaymentComplete={handlePaymentComplete}
-        onBack={handleBackToPricing}
-      />
-    );
-  }
+  // // Show dashboards
+  // if (currentView === 'dashboard') {
+  //   if (currentUser?.type === 'partner') {
+  //     return <PartnerDashboard userName={currentUser.name} onLogout={handleLogout} />;
+  //   }
 
-  // Show payment gateway page
-  if (currentView === 'payment' && selectedPlan) {
-    return (
-      <PaymentGatewayPage
-        selectedPlan={selectedPlan}
-        onSuccess={handlePaymentSuccess}
-      />
-    );
-  }
-
-  // Show dashboards
-  if (currentView === 'dashboard') {
-    if (currentUser?.type === 'partner') {
-      return <PartnerDashboard userName={currentUser.name} onLogout={handleLogout} />;
-    }
-
-    if (currentUser?.type === 'admin') {
-      return <AdminDashboard userName={currentUser.name} onLogout={handleLogout} />;
-    }
-  }
+  //   if (currentUser?.type === 'admin') {
+  //     return <AdminDashboard userName={currentUser.name} onLogout={handleLogout} />;
+  //   }
+  // }
 
   // Show landing page
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar onLoginClick={() => setIsLoginModalOpen(true)} />
-      <TopBanner />
-      <HeroSection onLoginClick={() => setIsLoginModalOpen(true)} />
-      <FeaturesSection />
-      <ProductSection />
-      <PricingSection onPlanSelect={handlePlanSelect} />
-      <WhyChooseUsSection />
-      <PartnerProgramSection />
-      <FAQSection />
-      <Footer />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => {
-          setIsLoginModalOpen(false);
-          setSelectedPlan(null);
-        }}
-        onLogin={handleLogin}
+    <Routes>
+      {/* Landing */}
+      <Route
+        path="/"
+        element={
+          <div className="min-h-screen bg-white">
+            <Navbar onLoginClick={() => setIsLoginModalOpen(true)} />
+            <TopBanner />
+            <HeroSection onLoginClick={() => setIsLoginModalOpen(true)} />
+            <FeaturesSection />
+            <HowItWorksSection />
+            <ProductSection />
+            <PricingSection onPlanSelect={handlePlanSelect} />
+            <WhyChooseUsSection />
+            <PartnerProgramSection />
+            <FAQSection />
+            <Footer />
+
+            <LoginModal
+              isOpen={isLoginModalOpen}
+              onClose={() => {
+                setIsLoginModalOpen(false);
+                setSelectedPlan(null);
+              }}
+              onLogin={handleLogin}
+            />
+          </div>
+        }
       />
-    </div>
+
+      {/* Checkout */}
+      <Route
+        path="/checkout"
+        element={
+          selectedPlan ? (
+            <CheckoutPage
+              selectedPlan={selectedPlan}
+              onPaymentComplete={handlePaymentComplete}
+              onBack={handleBackToPricing}
+            />
+          ) : (
+            <div className="p-10 text-center">No plan selected</div>
+          )
+        }
+      />
+
+      {/* Payment Success */}
+      <Route
+        path="/payment-success"
+        element={<PaymentSuccess />}
+      />
+
+      {/* Dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <div className="min-h-screen flex items-center justify-center">
+            <h1 className="text-3xl font-bold">Welcome to WorkEye Dashboard</h1>
+          </div>
+        }
+      />
+    </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-import logoImage from "../assets/workeye.png";
+import logoImage from "../assets/workeye.jpg";
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -24,14 +24,17 @@ export function Navbar({ onLoginClick }: NavbarProps) {
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-16 items-center justify-between">
             
-            {/* Logo – LEFT CORNER */}
+            {/* Logo */}
             <div className="flex items-center">
-              <img
-                src={logoImage}
-                alt="WorkEye Logo"
-                className="h-10 w-auto object-contain"
-              />
-            </div>
+  <div className="h-10 w-36 flex items-center justify-center">
+    <img
+      src={logoImage}
+      alt="WorkEye Logo"
+      className="h-full w-full object-contain"
+    />
+  </div>
+</div>
+
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -47,17 +50,23 @@ export function Navbar({ onLoginClick }: NavbarProps) {
             </div>
 
             {/* Right Actions */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center gap-4">
               <div className="text-right leading-tight">
-                <p className="text-sm font-semibold text-[#003366]">
+                <a
+                  href="tel:+919892440788"
+                  className="text-sm font-semibold text-[#003366] hover:underline block"
+                >
                   +91 9892440788
-                </p>
-                <p className="text-xs text-gray-500">We work 24/7</p>
+                </a>
+                <span className="text-xs text-gray-500">We work 24/7</span>
               </div>
 
               <Button
-                onClick={onLoginClick}
-                className="bg-[#003366] hover:bg-[#002244] text-white px-6"
+                onClick={() => {
+                  window.location.href =
+                    "https://frontend-8x7e.onrender.com/";
+                }}
+                className="bg-[#003366] hover:bg-[#002244] text-white px-6 py-2 rounded-md front-medium"
               >
                 Login
               </Button>
@@ -74,6 +83,7 @@ export function Navbar({ onLoginClick }: NavbarProps) {
                 <Menu className="h-6 w-6" />
               )}
             </button>
+
           </div>
         </div>
 
@@ -104,7 +114,8 @@ export function Navbar({ onLoginClick }: NavbarProps) {
 
       {/* 🔹 BLUE ANNOUNCEMENT BAR */}
       <div className="bg-[#003366] text-white text-center py-2 text-sm font-medium">
-        Empowering Businesses with Strength, Backed by Reliability, and Grounded in Stability.
+        Empowering Businesses with Strength, Backed by Reliability, and Grounded
+        in Stability.
       </div>
     </header>
   );

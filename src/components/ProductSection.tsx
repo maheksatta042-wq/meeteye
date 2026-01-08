@@ -1,33 +1,34 @@
 import { motion } from 'motion/react';
 import { DollarSign, ShoppingCart, Package, TrendingUp } from 'lucide-react';
+import { LuMonitorSmartphone } from "react-icons/lu";
 
 export function ProductSection() {
   const products = [
     {
       icon: DollarSign,
-      title: 'Advanced Financial Management',
-      description: 'Complete financial tracking with real-time expense monitoring, automated invoicing, and comprehensive reporting.',
+      title: 'Smart Employee Monitoring',
+      description: 'Real-time tracking of employee activities with live status, screenshots, and activity timelines to ensure transparency and accountability across teams.',
       color: 'border-blue-300 bg-blue-50',
       iconColor: 'text-blue-600',
     },
     {
       icon: Package,
-      title: 'Real-time Inventory & Stock Tracking',
-      description: 'Monitor inventory levels, track stock movements, and automate reordering with intelligent alerts.',
+      title: 'Advanced Productivity Analytics',
+      description: 'Detailed analytics on app usage, websites visited, time spent, and productivity trends with visual charts and historical data for better decision-making.',
       color: 'border-green-300 bg-green-50',
       iconColor: 'text-green-600',
     },
     {
       icon: ShoppingCart,
-      title: 'Sales, CRM & Customer Insights',
-      description: 'Manage customer relationships, track sales pipelines, and gain actionable insights into customer behavior.',
+      title: 'Time & Attendance Tracking',
+      description: 'Accurate time tracking with timelines, daily activity logs, and performance summaries to monitor work hours and optimize workforce efficiency.',
       color: 'border-orange-300 bg-orange-50',
       iconColor: 'text-orange-600',
     },
     {
       icon: TrendingUp,
-      title: 'Purchase & Vendor Automation',
-      description: 'Streamline procurement processes, manage vendor relationships, and automate purchase order workflows.',
+      title: 'Team & Performance Management',
+      description: 'Centralized employee management with individual profiles, performance metrics, reports, and downloadable insights to evaluate and improve team output.',
       color: 'border-purple-300 bg-purple-50',
       iconColor: 'text-purple-600',
     },

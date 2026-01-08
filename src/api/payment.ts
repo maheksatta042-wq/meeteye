@@ -2,19 +2,25 @@ import axios from "axios";
 
 import API from "./AxiosInstance";
 
-// ✅ FIXED: send amount + currency
-export const createOrder = async (
-  userId: string,
-  licenseId: string,
-  amount: number
-) => {
+type BillingCycle = "monthly" | "quarterly" | "yearly";
+
+export const createOrder = async ({
+  userId,
+  licenseId,
+  billingCycle,
+  amount,
+}: {
+  userId: string;
+  licenseId: string;
+  billingCycle: BillingCycle;
+  amount: number; // 👈 ADD THIS
+}) => {
   const res = await API.post(`/api/payment/create-order`, {
     userId,
-    licenseId, // 🔑 backend expects this name
-    amount,
-    currency: "INR",
+    licenseId,
+    billingCycle,
+    amount, // 👈 SEND IT
   });
-
   return res.data;
 };
 
@@ -27,4 +33,13 @@ export const verifyPayment = async (details: any) => {
 export const getTransactionDetails = async (transactionId: string) => {
   const res = await API.get(`/api/payment/transaction/${transactionId}`);
   return res.data;
+};
+
+export const downloadInvoice = (transactionId: string) => {
+  if (!transactionId) return;
+
+  window.open(
+    `https://lisence-system.onrender.com/api/payment/invoice/${transactionId}`,
+    "_blank"
+  );
 };
