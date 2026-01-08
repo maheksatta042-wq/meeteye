@@ -81,8 +81,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         return;
       }
 
-      
-
       const backendBillingCycle: BillingCycle = billingCycle;
 
       const totalAmount = calculateTotal();
