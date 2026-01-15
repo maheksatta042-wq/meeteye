@@ -1,4 +1,5 @@
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "./ui/card";
 import { CheckCircle2, Download, ArrowRight } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -8,6 +9,7 @@ import { getTransactionDetails, downloadInvoice } from "../api/payment";
 export function PaymentSuccess() {
   const [params] = useSearchParams();
   const transactionId = params.get("txn");
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<any>(null);
@@ -140,11 +142,9 @@ export function PaymentSuccess() {
               <Button
                 size="lg"
                 className="w-full"
-                onClick={() =>
-                  window.location.href = "https://frontend-8x7e.onrender.com/"
-                }
+                onClick={() => navigate('/tutorial')}
               >
-                Go to Dashboard
+                Go to Tutorial
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

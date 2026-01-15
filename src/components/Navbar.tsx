@@ -7,6 +7,7 @@ interface NavbarProps {
   
   onLogoClick?: () => void;
   onPartnersClick?: () => void;
+  onLoginClick?: () => void;
   onNavigateToSection?: (section: string) => void;
 }
 
