@@ -14,8 +14,7 @@ import { motion } from 'motion/react';
 
 
 import logoImage from "./assets/workeye.jpg";
-
-import workeye_dashboard  from "./assets/workeye_dashboard.png";
+import workeye_dashboard from "./assets/workeye_dashboard.png";
 import members from "./assets/members.png";
 import view_details from "./assets/view_details.png";
 import view_analytics from "./assets/view_analytics.png";

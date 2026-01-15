@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-import logoImage from "../assets/workeye.jpg";
+import logoImage from "./assets/workeye.jpg";
 
 interface NavbarProps {
   
