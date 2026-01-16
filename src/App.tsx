@@ -15,14 +15,13 @@ import { CheckoutPage } from './components/CheckoutPage';
 import { HowItWorksSection } from './components/HowitWorks';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { PaymentSuccess } from "./components/PaymentSuccess";
-<<<<<<< HEAD
 import Tutorial_Page from "./components/Tutorial_Page";
-=======
->>>>>>> 64a457dd1ee076ecc0ae57344bbbee613276fe0d
 import { PartnerDashboard } from "./components/PartnerDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
 
 type ViewState = 'landing' | 'checkout' | 'dashboard';
+
+type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
 export default function App() {
   const navigate = useNavigate();
@@ -33,6 +32,7 @@ export default function App() {
   name: string;
   price: string;
   period: string;
+  billingCycle: BillingCycle;
 } | null>(null);
   const [currentUser, setCurrentUser] = useState<{
     type: 'partner' | 'admin' | null;
@@ -44,6 +44,7 @@ export default function App() {
     name: string;
     price: string;
     period: string;
+    billingCycle: BillingCycle;
   }) => {
     setSelectedPlan(plan);
     setIsLoginModalOpen(true);
@@ -126,15 +127,12 @@ export default function App() {
         }
       />
 
-<<<<<<< HEAD
       {/* Tutorial */}
     <Route
      path="/tutorial"
      element={<Tutorial_Page />}
     />
 
-=======
->>>>>>> 64a457dd1ee076ecc0ae57344bbbee613276fe0d
       {/* Checkout */}
       <Route
         path="/checkout"
