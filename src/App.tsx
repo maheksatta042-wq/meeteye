@@ -15,7 +15,10 @@ import { CheckoutPage } from './components/CheckoutPage';
 import { HowItWorksSection } from './components/HowitWorks';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { PaymentSuccess } from "./components/PaymentSuccess";
+<<<<<<< HEAD
 import Tutorial_Page from "./components/Tutorial_Page";
+=======
+>>>>>>> 64a457dd1ee076ecc0ae57344bbbee613276fe0d
 import { PartnerDashboard } from "./components/PartnerDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
 
@@ -123,12 +126,15 @@ export default function App() {
         }
       />
 
+<<<<<<< HEAD
       {/* Tutorial */}
     <Route
      path="/tutorial"
      element={<Tutorial_Page />}
     />
 
+=======
+>>>>>>> 64a457dd1ee076ecc0ae57344bbbee613276fe0d
       {/* Checkout */}
       <Route
         path="/checkout"

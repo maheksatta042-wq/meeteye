@@ -1,26 +1,20 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-import logoImage from "./assets/workeye.jpg";
+import logoImage from "../assets/workeye.jpg";
 
 interface NavbarProps {
-  
-  onLogoClick?: () => void;
-  onPartnersClick?: () => void;
-  onLoginClick?: () => void;
-  onNavigateToSection?: (section: string) => void;
+  onLoginClick: () => void;
 }
 
-export function Navbar({ onLoginClick, onLogoClick, onPartnersClick, onNavigateToSection }: NavbarProps) {
+export function Navbar({ onLoginClick }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Features', href: '#features' },
-    { name: 'Product', href: '#product' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Partners', href: '#partners' },
-    { name: 'FAQs', href: '#faq' },
+    { name: "Features", href: "#features" },
+    { name: "How It Works", href: "#how" },
+    { name: "Pricing", href: "#pricing" },
+    { name: "FAQ", href: "#faq" },
   ];
 
   return (
@@ -70,9 +64,9 @@ export function Navbar({ onLoginClick, onLogoClick, onPartnersClick, onNavigateT
               <Button
                 onClick={() => {
                   window.location.href =
-                    "https://frontend-8x7e.onrender.com";
+                    "https://frontend-8x7e.onrender.com/";
                 }}
-                className="bg-[#003366] hover:bg-[#002244] text-white px-5 py-15 rounded-lg"
+                className="bg-[#003366] hover:bg-[#002244] text-white px-6 py-2 rounded-md front-medium"
               >
                 Login
               </Button>
@@ -99,24 +93,13 @@ export function Navbar({ onLoginClick, onLogoClick, onPartnersClick, onNavigateT
             <div className="px-4 py-4 space-y-4">
               {navLinks.map((link) => (
                 <a
-                key={link.name}
-                href={link.href}
-                className="block text-gray-700 hover:text-[#00C4CC] transition-colors py-2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (link.name === 'Partners' && onPartnersClick) {
-                    onPartnersClick();
-                  } else if (onNavigateToSection) {
-                    onNavigateToSection(link.href.substring(1));
-                  } else {
-                    const element = document.querySelector(link.href);
-                    element?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                  setIsMobileMenuOpen(false);
-                }}
-              >
-                {link.name}
-              </a>
+                  key={link.name}
+                  href={link.href}
+                  className="block text-gray-700 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
               ))}
               <Button
                 onClick={onLoginClick}
