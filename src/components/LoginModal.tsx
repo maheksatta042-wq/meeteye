@@ -31,7 +31,7 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
     try {
       // SIGN UP
       if (isSignUp) {
-        await syncCustomer({ name, email, source: "worktrackpro" });
+        await syncCustomer({ name, email, source: "workeye" });
 
         const user = {
           name: name || email.split("@")[0],
@@ -83,8 +83,8 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
           </DialogTitle>
           <DialogDescription className="text-center">
             {isSignUp
-              ? "Create your WorkTrackPro account"
-              : "Sign in to access the WorkTrackPro dashboard"}
+              ? "Create your Workeye account"
+              : "Sign in to access the Workeye dashboard"}
           </DialogDescription>
         </DialogHeader>
 
@@ -106,7 +106,7 @@ export function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
             <Input
               id="email"
               type="email"
-              placeholder="admin@worktrackpro.com"
+              placeholder="admin@workeye.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

@@ -14,6 +14,7 @@ interface CheckoutPageProps {
     name: string;
     price: string;
     period: string;
+    billingCycle: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
   onPaymentComplete: (email: string) => void;
   onBack: () => void;
@@ -21,8 +22,8 @@ interface CheckoutPageProps {
 
 export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: CheckoutPageProps) {
   const navigate = useNavigate();
-  type BillingCycle = "monthly" | "yearly";
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
+  type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>(selectedPlan.billingCycle || "yearly");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Extract userId from URL path (e.g., /checkout/{userId})
@@ -36,13 +37,23 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   const calculateSubtotal = () => {
     const basePrice = Number(selectedPlan.price);
     if (isNaN(basePrice)) return 0;
-    const months = billingCycle === "yearly" ? 12 : 1;
+    
+    let months = 1;
+    if (billingCycle === "quarterly") months = 3;
+    else if (billingCycle === "half-yearly") months = 6;
+    else if (billingCycle === "yearly") months = 12;
+    
     return basePrice * months;
   };
 
   const calculateDiscount = () => {
-    if (billingCycle === "yearly") {
-      return calculateSubtotal() * 0.2;
+    const subtotal = calculateSubtotal();
+    if (billingCycle === "quarterly") {
+      return subtotal * 0.05; // 5% discount for quarterly
+    } else if (billingCycle === "half-yearly") {
+      return subtotal * 0.10; // 10% discount for half-yearly
+    } else if (billingCycle === "yearly") {
+      return subtotal * 0.20; // 20% discount for yearly
     }
     return 0;
   };
@@ -74,7 +85,12 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         return;
       }
 
-      const backendBillingCycle: BillingCycle = billingCycle;
+      // Map UI billing cycles to backend billing cycles
+      const backendBillingCycle = 
+        billingCycle === "quarterly" || billingCycle === "half-yearly" 
+          ? "monthly" 
+          : billingCycle;
+
       const totalAmount = calculateTotal();
       const amountInPaise = totalAmount * 100;
 
@@ -94,8 +110,8 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           name: loggedInUser.name,
           email: loggedInUser.email,
           licenseId,
-          billingCycle: backendBillingCycle,
-          amount: calculateTotal(),
+          billingCycle: "monthly",
+          amount: 0,
           currency: "INR",
         });
 
@@ -127,7 +143,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
       const order = await createOrder({
         userId: purchaseRes.userId,
         licenseId,
-        billingCycle: backendBillingCycle,
+        billingCycle,
         amount: amountInPaise,
       });
 
@@ -177,6 +193,34 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
       alert(message);
       setIsSubmitting(false);
     }
+  };
+
+  const getDurationText = () => {
+    if (billingCycle === "monthly") return "1 month";
+    if (billingCycle === "quarterly") return "3 months";
+    if (billingCycle === "half-yearly") return "6 months";
+    return "12 months";
+  };
+
+  const getPeriodText = () => {
+    if (billingCycle === "monthly") return "month";
+    if (billingCycle === "quarterly") return "quarter";
+    if (billingCycle === "half-yearly") return "6 months";
+    return "year";
+  };
+
+  const getDiscountText = () => {
+    if (billingCycle === "quarterly") return "5%";
+    if (billingCycle === "half-yearly") return "10%";
+    if (billingCycle === "yearly") return "20%";
+    return "";
+  };
+
+  const getBillingLabel = () => {
+    if (billingCycle === "quarterly") return "Quarterly";
+    if (billingCycle === "half-yearly") return "Half-Yearly";
+    if (billingCycle === "yearly") return "Annual";
+    return "Monthly";
   };
 
   return (
@@ -244,6 +288,64 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                 Save 20%
               </span>
             </div>
+
+            <div 
+              onClick={() => setBillingCycle('half-yearly')}
+              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                billingCycle === 'half-yearly' 
+                  ? 'border-green-600 bg-green-50 shadow-sm' 
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  billingCycle === 'half-yearly' 
+                    ? 'border-green-600 bg-white' 
+                    : 'border-gray-300'
+                }`}>
+                  {billingCycle === 'half-yearly' && (
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
+                  )}
+                </div>
+                <span className={`font-medium ${
+                  billingCycle === 'half-yearly' ? 'text-gray-900' : 'text-gray-700'
+                }`}>
+                  Half-Yearly Billing
+                </span>
+              </div>
+              <span className="text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded">
+                Save 10%
+              </span>
+            </div>
+
+            <div 
+              onClick={() => setBillingCycle('quarterly')}
+              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                billingCycle === 'quarterly' 
+                  ? 'border-green-600 bg-green-50 shadow-sm' 
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  billingCycle === 'quarterly' 
+                    ? 'border-green-600 bg-white' 
+                    : 'border-gray-300'
+                }`}>
+                  {billingCycle === 'quarterly' && (
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
+                  )}
+                </div>
+                <span className={`font-medium ${
+                  billingCycle === 'quarterly' ? 'text-gray-900' : 'text-gray-700'
+                }`}>
+                  Quarterly Billing
+                </span>
+              </div>
+              <span className="text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded">
+                Save 5%
+              </span>
+            </div>
             
             <div 
               onClick={() => setBillingCycle('monthly')}
@@ -275,12 +377,12 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
             <div className="flex justify-between text-gray-700">
               <span>Base Price</span>
-              <span>₹{selectedPlan.price}/{billingCycle === "yearly" ? "year" : "month"}</span>
+              <span>₹{selectedPlan.price}/{getPeriodText()}</span>
             </div>
             
             <div className="flex justify-between text-gray-600 text-sm">
               <span>Duration</span>
-              <span>{billingCycle === "yearly" ? "12 months" : "1 month"}</span>
+              <span>{getDurationText()}</span>
             </div>
             
             <div className="flex justify-between text-gray-700">
@@ -288,9 +390,9 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
               <span>₹{calculateSubtotal()}</span>
             </div>
             
-            {billingCycle === 'yearly' && (
+            {getDiscountText() && (
               <div className="flex justify-between text-green-700 font-medium">
-                <span>Annual Discount (20%)</span>
+                <span>{getBillingLabel()} Discount ({getDiscountText()})</span>
                 <span>-₹{calculateDiscount().toFixed(0)}</span>
               </div>
             )}
