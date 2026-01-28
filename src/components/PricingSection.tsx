@@ -74,9 +74,9 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     if (plan.isFree || plan.isEnterprise) return plan.basePrice;
 
     if (billingCycle === "monthly") return plan.basePrice;
-    if (billingCycle === "quarterly") return Math.round(plan.basePrice * 3 * 0.95); // 5% discount
-    if (billingCycle === "half-yearly") return Math.round(plan.basePrice * 6 * 0.90); // 10% discount
-    return Math.round(plan.basePrice * 12 * 0.8); // 20% discount
+    if (billingCycle === "quarterly") return (plan.basePrice * 3 * 0.95); // 5% discount
+    if (billingCycle === "half-yearly") return (plan.basePrice * 6 * 0.90); // 10% discount
+    return (plan.basePrice * 12 * 0.8); // 20% discount
   };
 
   const getBillingText = () => {
@@ -119,7 +119,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     const loadPlans = async () => {
       try {
         const res = await fetch(
-          "https://lisence-system.onrender.com/api/license/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",

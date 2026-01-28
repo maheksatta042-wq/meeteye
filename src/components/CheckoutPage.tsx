@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, Users } from 'lucide-react';
 import { Logo } from './Logo';
 import { createOrder, verifyPayment } from "../api/payment";
 import { checkCustomerExists, syncCustomer } from "../api/customerSync";
@@ -12,7 +12,7 @@ interface CheckoutPageProps {
   selectedPlan: {
     licenseId: string;
     name: string;
-    price: string;
+    price: string; // This is the price per user per month from pricing page
     period: string;
     billingCycle: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
@@ -23,27 +23,181 @@ interface CheckoutPageProps {
 export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: CheckoutPageProps) {
   const navigate = useNavigate();
   type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
+  
+  // Initialize with the billing cycle that was selected on the pricing page
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(selectedPlan.billingCycle || "yearly");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Extract userId from URL path (e.g., /checkout/{userId})
-  const userId = window.location.pathname.split('/').pop() || '';
+  const [loading, setLoading] = useState(true);
+  const [planDetails, setPlanDetails] = useState<{
+    pricePerUser: number;
+    includedUsers: number;
+    planName: string;
+  } | null>(null);
 
   const loggedInUser: {
     name?: string;
     email?: string;
   } = JSON.parse(localStorage.getItem("user") || "{}");
 
+  // Fetch plan details including user count
+  useEffect(() => {
+    const fetchPlanDetails = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          {
+            headers: {
+              "x-api-key": "my-secret-key-123",
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        const matched = data.licenses.find(
+          (lic: any) => lic?._id === selectedPlan.licenseId
+        );
+
+        if (!matched) {
+          throw new Error("Selected plan not found");
+        }
+
+        console.log("📦 Matched License:", matched);
+        console.log("🎯 License Type:", matched.licenseType);
+        console.log("✨ Raw Features:", matched.licenseType.features);
+
+        // Extract user count from features
+        let userCount = 1; // Default fallback
+        const rawFeatures = matched.licenseType.features || [];
+
+        console.log("🔍 Features type:", typeof rawFeatures, "isArray:", Array.isArray(rawFeatures));
+        
+        // Handle array format (feature registry)
+        if (Array.isArray(rawFeatures)) {
+          const userFeatures = [];
+          
+          for (const feature of rawFeatures) {
+            if (typeof feature === "object") {
+              const label = (feature.uiLabel || feature.displayName || "").toLowerCase();
+              const key = (feature.featureKey || "").toLowerCase();
+              const slug = (feature.featureSlug || "").toLowerCase();
+              const value = feature.limitValue ?? feature.value;
+              
+              console.log("🔍 Checking feature:", { 
+                label, 
+                key, 
+                slug, 
+                type: feature.featureType, 
+                value: value,
+                displayName: feature.displayName 
+              });
+              
+              if (feature.featureType === "limit" && typeof value === "number") {
+                const isUserFeature = 
+                  slug === "user-limit" || 
+                  key === "user-limit" ||
+                  slug.includes("user") || 
+                  key.includes("user") || 
+                  label.includes("user");
+                
+                if (isUserFeature) {
+                  userFeatures.push({
+                    key: slug || key || label,
+                    value: value,
+                    priority: (slug === "user-limit" || key === "user-limit") ? 1 : 2
+                  });
+                  console.log("✅ Found potential user feature:", { key: slug || key, value: value });
+                }
+              }
+            } else if (typeof feature === "string") {
+              const match = feature.match(/(\d+)\s*users?/i);
+              if (match) {
+                userFeatures.push({
+                  key: "string-match",
+                  value: parseInt(match[1]),
+                  priority: 1
+                });
+                console.log("✅ Found users in string feature:", match[1]);
+              }
+            }
+          }
+          
+          if (userFeatures.length > 0) {
+            userFeatures.sort((a, b) => {
+              if (a.priority !== b.priority) return a.priority - b.priority;
+              return b.value - a.value;
+            });
+            userCount = userFeatures[0].value;
+            console.log("✅ Selected user count:", userCount, "from:", userFeatures[0].key);
+          }
+        } 
+        // Handle object format (validatedFeatureMap)
+        else if (typeof rawFeatures === "object" && rawFeatures !== null) {
+          console.log("🔍 Processing features as object/map");
+          const userFeatures = [];
+          
+          for (const [slug, value] of Object.entries(rawFeatures)) {
+            const slugLower = slug.toLowerCase();
+            
+            console.log("🔍 Checking feature key:", slug, "value:", value, "type:", typeof value);
+            
+            const isUserFeature = 
+              slugLower === "user-limit" || 
+              slugLower === "users" || 
+              slugLower.includes("user-limit") ||
+              (slugLower.includes("user") && !slugLower.includes("admin"));
+            
+            if (isUserFeature && typeof value === "number" && value > 0) {
+              userFeatures.push({
+                key: slug,
+                value: value,
+                priority: (slugLower === "user-limit" || slugLower === "users") ? 1 : 2
+              });
+              console.log("✅ Found potential user feature:", slug, "=", value);
+            }
+          }
+          
+          if (userFeatures.length > 0) {
+            userFeatures.sort((a, b) => {
+              if (a.priority !== b.priority) return a.priority - b.priority;
+              return b.value - a.value;
+            });
+            userCount = userFeatures[0].value;
+            console.log("✅ Selected user count:", userCount, "from key:", userFeatures[0].key);
+          }
+        }
+
+        console.log("🎯 Final user count:", userCount);
+
+        setPlanDetails({
+          pricePerUser: Number(selectedPlan.price),
+          includedUsers: userCount,
+          planName: selectedPlan.name,
+        });
+      } catch (err) {
+        console.error("Failed to load plan details", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlanDetails();
+  }, [selectedPlan.licenseId, selectedPlan.price, selectedPlan.name]);
+
+  // Calculate base monthly cost (price per user × number of users)
+  const getMonthlyBaseCost = () => {
+    if (!planDetails) return 0;
+    return planDetails.pricePerUser * planDetails.includedUsers;
+  };
+
+  // Calculate subtotal based on billing cycle BEFORE discount
   const calculateSubtotal = () => {
-    const basePrice = Number(selectedPlan.price);
-    if (isNaN(basePrice)) return 0;
+    const monthlyBase = getMonthlyBaseCost();
     
-    let months = 1;
-    if (billingCycle === "quarterly") months = 3;
-    else if (billingCycle === "half-yearly") months = 6;
-    else if (billingCycle === "yearly") months = 12;
-    
-    return basePrice * months;
+    if (billingCycle === "monthly") return monthlyBase;
+    if (billingCycle === "quarterly") return monthlyBase * 3;
+    if (billingCycle === "half-yearly") return monthlyBase * 6;
+    return monthlyBase * 12;
   };
 
   const calculateDiscount = () => {
@@ -60,21 +214,22 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
   const calculateTax = () => {
     const subtotalAfterDiscount = calculateSubtotal() - calculateDiscount();
-    return subtotalAfterDiscount * 0.18; // 18% GST
+    return Math.round(subtotalAfterDiscount * 0.18); // 18% GST
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() - calculateDiscount() + calculateTax();
+    return Math.round(calculateSubtotal() - calculateDiscount() + calculateTax());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !planDetails) return;
     setIsSubmitting(true);
 
     try {
       if (!loggedInUser?.email || !loggedInUser?.name) {
         alert("Session expired. Please login again.");
+        setIsSubmitting(false);
         return;
       }
 
@@ -103,7 +258,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         });
       }
 
-      const isStarterPlan = selectedPlan.price === "0";
+      const isStarterPlan = planDetails.pricePerUser === 0;
 
       if (isStarterPlan) {
         await purchaseLicense({
@@ -203,10 +358,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   };
 
   const getPeriodText = () => {
-    if (billingCycle === "monthly") return "month";
-    if (billingCycle === "quarterly") return "quarter";
-    if (billingCycle === "half-yearly") return "6 months";
-    return "year";
+    return "month";
   };
 
   const getDiscountText = () => {
@@ -222,6 +374,17 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     if (billingCycle === "yearly") return "Annual";
     return "Monthly";
   };
+
+  if (loading || !planDetails) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -256,7 +419,11 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
           <div className="mb-6 pb-6 border-b border-gray-200">
             <p className="text-sm text-gray-600 mb-3">Selected Plan</p>
-            <p className="text-lg font-semibold text-gray-900">{selectedPlan.name}</p>
+            <p className="text-lg font-semibold text-gray-900 mb-2">{planDetails.planName}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Users className="h-4 w-4" />
+              <span>Includes {planDetails.includedUsers} users</span>
+            </div>
           </div>
 
           <div className="space-y-3 mb-6">
@@ -376,18 +543,25 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
           <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
             <div className="flex justify-between text-gray-700">
-              <span>Base Price</span>
-              <span>₹{selectedPlan.price}/{getPeriodText()}</span>
-            </div>
-            
-            <div className="flex justify-between text-gray-600 text-sm">
-              <span>Duration</span>
-              <span>{getDurationText()}</span>
+              <span>Price per user/month</span>
+              <span>₹{planDetails.pricePerUser.toFixed(0)}</span>
             </div>
             
             <div className="flex justify-between text-gray-700">
+              <span>Number of users</span>
+              <span>×{planDetails.includedUsers}</span>
+            </div>
+            
+            <div className="flex justify-between text-gray-600 text-sm">
+              <span>Billing period</span>
+              <span>{getDurationText()}</span>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-3 mt-3" />
+            
+            <div className="flex justify-between text-gray-700 font-medium">
               <span>Subtotal</span>
-              <span>₹{calculateSubtotal()}</span>
+              <span>₹{calculateSubtotal().toFixed(0)}</span>
             </div>
             
             {getDiscountText() && (

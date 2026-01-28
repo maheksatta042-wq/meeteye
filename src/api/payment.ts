@@ -13,13 +13,13 @@ export const createOrder = async ({
   userId: string;
   licenseId: string;
   billingCycle: BillingCycle;
-  amount: number; // 👈 ADD THIS
+  amount: number; 
 }) => {
   const res = await API.post(`/api/payment/create-order`, {
     userId,
     licenseId,
     billingCycle,
-    amount, // 👈 SEND IT
+    amount, 
   });
   return res.data;
 };
