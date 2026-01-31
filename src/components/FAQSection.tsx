@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface FAQ {
@@ -9,7 +9,7 @@ interface FAQ {
 
 interface FAQCategory {
   category: string;
-  icon: string;
+  icon?: string;
   faqs: FAQ[];
 }
 
@@ -20,11 +20,10 @@ export function FAQSection() {
   const faqCategories: FAQCategory[] = [
     {
       category: 'Technical',
-      icon: '⚙️',
       faqs: [
         {
-          question: 'What are the system requirements for WorkTrackPro?',
-          answer: 'WorkTrackPro requires Windows 10 or later, macOS 10.15 or later, or Linux (Ubuntu 18.04+). The tracker requires minimal system resources: 2GB RAM, 500MB disk space, and a stable internet connection. The tracker runs silently in the background with minimal CPU usage (<5%).',
+          question: 'What are the system requirements for WorkEye?',
+          answer: 'WorkEye requires Windows 10 or later, macOS 10.15 or later, or Linux (Ubuntu 18.04+). The tracker requires minimal system resources: 2GB RAM, 500MB disk space, and a stable internet connection. The tracker runs silently in the background with minimal CPU usage (<5%).',
         },
         {
           question: 'How does the real-time tracking work?',
@@ -32,7 +31,7 @@ export function FAQSection() {
         },
         {
           question: 'Is the tracker software detectable by employees?',
-          answer: 'The WorkTrackPro tracker is visible in the system tray and task manager as per ethical monitoring practices. We believe in transparent workforce monitoring. Employees can see when tracking is active, and the software displays clear indicators during screenshot capture.',
+          answer: 'The WorkEye tracker is visible in the system tray and task manager as per ethical monitoring practices. We believe in transparent workforce monitoring. Employees can see when tracking is active, and the software displays clear indicators during screenshot capture.',
         },
         {
           question: 'What happens if the internet connection is lost?',
@@ -46,18 +45,17 @@ export function FAQSection() {
     },
     {
       category: 'General',
-      icon: '💼',
       faqs: [
         {
-          question: 'What is WorkTrackPro?',
-          answer: 'WorkTrackPro is a comprehensive employee tracking application that monitors workforce activity through real-time system tracking, including cursor/idle detection, app usage monitoring, browser activity tracking, system lock/unlock detection, computer on/off logging, and automated screenshot capture. It helps organizations improve productivity and ensure accountability.',
+          question: 'What is WorkEye?',
+          answer: 'WorkEye is a comprehensive employee tracking application that monitors workforce activity through real-time system tracking, including cursor/idle detection, app usage monitoring, browser activity tracking, system lock/unlock detection, computer on/off logging, and automated screenshot capture. It helps organizations improve productivity and ensure accountability.',
         },
         {
-          question: 'Is WorkTrackPro suitable for remote teams?',
-          answer: 'Absolutely! WorkTrackPro is specifically designed for remote and hybrid workforce management. With real-time tracking, automated daily summaries, and comprehensive activity logs, managers can monitor remote employees as effectively as in-office teams. The system works seamlessly across different time zones.',
+          question: 'Is WorkEye suitable for remote teams?',
+          answer: 'Absolutely! WorkEye is specifically designed for remote and hybrid workforce management. With real-time tracking, automated daily summaries, and comprehensive activity logs, managers can monitor remote employees as effectively as in-office teams. The system works seamlessly across different time zones.',
         },
         {
-          question: 'How do I get started with WorkTrackPro?',
+          question: 'How do I get started with WorkEye?',
           answer: 'Getting started is simple: 1) Sign up for a free 14-day trial (no credit card required), 2) Download and install the tracker on employee computers, 3) Configure your tracking preferences in the admin dashboard, 4) Start monitoring and receiving automatic daily productivity reports. Our setup wizard guides you through each step.',
         },
         {
@@ -65,18 +63,17 @@ export function FAQSection() {
           answer: 'Yes! We provide comprehensive onboarding training, video tutorials, documentation, and 24/7 email support. Professional and Enterprise plans include live chat support and dedicated account managers. We also offer webinar training sessions for team administrators.',
         },
         {
-          question: 'Can I integrate WorkTrackPro with other tools?',
-          answer: 'Currently, WorkTrackPro operates as a standalone solution with its own dashboard and reporting system. However, we offer data export features (CSV, PDF) for integration with your existing HR and productivity tools. API access is available on Enterprise plans.',
+          question: 'Can I integrate WorkEye with other tools?',
+          answer: 'Currently, WorkEye operates as a standalone solution with its own dashboard and reporting system. However, we offer data export features (CSV, PDF) for integration with your existing HR and productivity tools. API access is available on Enterprise plans.',
         },
       ],
     },
     {
       category: 'Billing & Pricing',
-      icon: '💳',
       faqs: [
         {
           question: 'How does your pricing work?',
-          answer: 'WorkTrackPro uses per-user monthly pricing with three tiers: Starter ($9/user/month for up to 5 users), Professional ($15/user/month for up to 50 users), and Enterprise (custom pricing for unlimited users). All plans include a 14-day free trial. Annual billing offers a 20% discount.',
+          answer: 'WorkEye uses per-user monthly pricing with three tiers: Starter ($9/user/month for up to 5 users), Professional ($15/user/month for up to 50 users), and Enterprise (custom pricing for unlimited users). All plans include a 14-day free trial. Annual billing offers a 20% discount.',
         },
         {
           question: 'Is there a free trial available?',
@@ -98,11 +95,10 @@ export function FAQSection() {
     },
     {
       category: 'Features & Data',
-      icon: '📊',
       faqs: [
         {
           question: 'What tracking features are included?',
-          answer: 'WorkTrackPro includes: Real-time cursor/idle detection (1-minute intervals), comprehensive app usage monitoring with timestamps, browser activity and website tracking, automated screenshot capture (configurable from 1-30 minutes), system lock/unlock detection, computer on/off time logging, automatic daily productivity summaries, and self-updating tracker system.',
+          answer: 'WorkEye includes: Real-time cursor/idle detection (1-minute intervals), comprehensive app usage monitoring with timestamps, browser activity and website tracking, automated screenshot capture (configurable from 1-30 minutes), system lock/unlock detection, computer on/off time logging, automatic daily productivity summaries, and self-updating tracker system.',
         },
         {
           question: 'How is productivity calculated?',
@@ -156,7 +152,7 @@ export function FAQSection() {
             Frequently Asked <span className="text-[#00C4CC]">Questions</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Find answers to common questions about WorkTrackPro's features, pricing, and implementation
+            Find answers to common questions about WorkEye's features, pricing, and implementation
           </p>
         </motion.div>
 
@@ -242,11 +238,11 @@ export function FAQSection() {
             Still have questions?
           </h3>
           <p className="text-gray-200 text-lg mb-6 max-w-2xl mx-auto">
-            Our support team is here to help you understand how WorkTrackPro can transform your workforce management
+            Our support team is here to help you understand how WorkEye can transform your workforce management
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:support@worktrackpro.com"
+              href="mailto:support@workeye.com"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#003366] rounded-lg hover:bg-[#00C4CC] hover:text-white transition-colors"
             >
               Contact Support

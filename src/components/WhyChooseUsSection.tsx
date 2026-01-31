@@ -40,7 +40,7 @@ export function WhyChooseUsSection() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl mb-4">
-            Why Choose <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">WorkTrackPro</span>
+            Why Choose <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">WorkEye</span>
           </h2>
           <p className="text-xl text-gray-600 leading-relaxed">
             We're not just another monitoring tool - we're your partner in building a more productive, 

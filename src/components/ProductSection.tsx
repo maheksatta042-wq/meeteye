@@ -124,16 +124,7 @@ export function ProductSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.6 }}
         >
-          <p className="text-gray-600 text-lg mb-6">
-            Learn More About WorkTrackPro
-          </p>
-          <motion.button 
-            className="bg-gradient-to-r from-[#00C4CC] to-[#0066CC] text-white px-8 py-3 rounded-lg hover:from-[#00B0BC] hover:to-[#0052A3] transition-all duration-300 shadow-lg hover:shadow-xl"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Know More
-          </motion.button>
+
         </motion.div>
       </div>
     </section>

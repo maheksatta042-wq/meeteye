@@ -1,27 +1,8 @@
-import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Navbar } from './Navbar';
-import { TopBanner } from './TopBanner';
-import { Footer } from './Footer';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Checkbox } from './ui/checkbox';
-import { 
-  Building2, 
-  Users, 
-  Globe, 
-  TrendingUp, 
-  Award, 
-  CheckCircle,
-  Send,
-  Handshake,
-  Target,
-  Zap
-} from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { CheckCircle, Globe, TrendingUp, Users, Award, Briefcase, Target, Zap } from 'lucide-react';
+import { submitPartnerApplication } from '../api/partnerProgram';
 
 interface BecomePartnerPageProps {
   onBackToPartners: () => void;
@@ -30,601 +11,559 @@ interface BecomePartnerPageProps {
   onNavigateToSection: (section: string) => void;
 }
 
-const benefits = [
-  {
-    icon: TrendingUp,
-    title: 'Revenue Growth',
-    description: 'Expand your business with competitive margins and recurring revenue opportunities'
-  },
-  {
-    icon: Users,
-    title: 'Marketing Support',
-    description: 'Get access to marketing materials, co-marketing opportunities, and lead generation'
-  },
-  {
-    icon: Award,
-    title: 'Training & Certification',
-    description: 'Comprehensive training programs and certification to enhance your expertise'
-  },
-  {
-    icon: Handshake,
-    title: 'Dedicated Support',
-    description: 'Priority technical support and dedicated partner success manager'
-  },
-  {
-    icon: Target,
-    title: 'Sales Enablement',
-    description: 'Sales tools, presentations, and demo environments to help close deals'
-  },
-  {
-    icon: Zap,
-    title: 'Early Access',
-    description: 'Get early access to new features and participate in beta programs'
-  }
-];
+export function BecomePartnerPage({
+  onBackToPartners,
+  onPartnerLoginClick,
+  onBackToHome,
+  onNavigateToSection,
+}: BecomePartnerPageProps) {
+  const partnerBenefits = [
+    {
+      icon: TrendingUp,
+      title: 'Revenue Growth',
+      description: 'Unlock new revenue streams with our partner program',
+    },
+    {
+      icon: Users,
+      title: 'Training & Certification',
+      description: 'Access comprehensive training and certification programs',
+    },
+    {
+      icon: Award,
+      title: 'Partner Tiers',
+      description: 'Bronze, Silver, and Gold partnership levels',
+    },
+    {
+      icon: Briefcase,
+      title: 'Business Support',
+      description: 'Dedicated partner success managers',
+    },
+    {
+      icon: Target,
+      title: 'Marketing Resources',
+      description: 'Co-marketing materials and campaigns',
+    },
+    {
+      icon: Zap,
+      title: 'Priority Support',
+      description: 'Fast-track technical support for partners',
+    },
+  ];
 
-export function BecomePartnerPage({ onBackToPartners, onPartnerLoginClick, onBackToHome, onNavigateToSection }: BecomePartnerPageProps) {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    company: '',
-    website: '',
-    companySize: '',
-    country: '',
-    state: '',
-    city: '',
-    partnerType: '',
-    industryFocus: '',
-    experience: '',
-    currentSolutions: '',
-    certifications: '',
-    estimatedClients: '',
-    message: '',
-    agreeToTerms: false
-  });
-
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.agreeToTerms) {
-      toast.error('Please accept the terms and conditions');
-      return;
-    }
-
-    // Validate required fields
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'company', 'partnerType'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-    
-    if (missingFields.length > 0) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    toast.success('Application submitted successfully! Our team will contact you within 2-3 business days.');
-    
-    // Reset form
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      company: '',
-      website: '',
-      companySize: '',
-      country: '',
-      state: '',
-      city: '',
-      partnerType: '',
-      industryFocus: '',
-      experience: '',
-      currentSolutions: '',
-      certifications: '',
-      estimatedClients: '',
-      message: '',
-      agreeToTerms: false
-    });
-  };
+  const partnerTiers = [
+    {
+      name: 'Bronze Partner',
+      color: 'from-orange-400 to-orange-600',
+      requirements: ['Basic certification', '5+ implementations', 'Annual revenue target'],
+      benefits: ['Partner badge', 'Marketing materials', 'Technical support'],
+    },
+    {
+      name: 'Silver Partner',
+      color: 'from-gray-300 to-gray-500',
+      requirements: ['Advanced certification', '15+ implementations', 'Higher revenue target'],
+      benefits: ['All Bronze benefits', 'Priority support', 'Co-marketing opportunities'],
+    },
+    {
+      name: 'Gold Partner',
+      color: 'from-yellow-400 to-yellow-600',
+      requirements: ['Expert certification', '30+ implementations', 'Premium revenue target'],
+      benefits: ['All Silver benefits', 'Dedicated success manager', 'Featured listing'],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar 
-        onLoginClick={onPartnerLoginClick} 
-        onLogoClick={onBackToHome}
-        onNavigateToSection={onNavigateToSection}
-      />
-      <TopBanner />
-      
       {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20"
-      >
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ x: -30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
+      <section className="relative bg-gradient-to-br from-[#002855] to-[#0066CC] text-white py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Become a Workeye Partner
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
+              Join our network of trusted partners and grow your business with Workeye
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Tabs */}
+      <div className="bg-[#00BCD4] sticky top-16 md:top-20 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center">
+            <div className="flex-1 md:flex-none px-8 py-4 text-center bg-white text-[#002855] font-medium border-b-4 border-white">
+              Become a partner
+            </div>
+            <Link
+              to="/partners"
+              className="flex-1 md:flex-none px-8 py-4 text-center text-white hover:bg-white/10 transition-colors font-medium border-b-4 border-transparent hover:border-white"
             >
-              <h1 className="text-5xl md:text-6xl mb-6">
-                Join Our Partner Network
-              </h1>
-              <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                Become a WorkTrackPro partner and unlock new revenue opportunities while helping businesses 
-                optimize their workforce management.
-              </p>
-              <div className="flex gap-4">
-                <div className="text-center">
-                  <div className="text-4xl font-bold mb-1">500+</div>
-                  <div className="text-sm text-blue-200">Active Partners</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold mb-1">50K+</div>
-                  <div className="text-sm text-blue-200">Clients Served</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold mb-1">95%</div>
-                  <div className="text-sm text-blue-200">Satisfaction Rate</div>
-                </div>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ x: 30, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden md:block"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1745847768380-2caeadbb3b71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMHBhcnRuZXJzaGlwJTIwaGFuZHNoYWtlfGVufDF8fHx8MTc2NzkzMDMzNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Partnership"
-                className="rounded-lg shadow-2xl"
-              />
-            </motion.div>
+              Partner directory
+            </Link>
           </div>
         </div>
-      </motion.section>
+      </div>
 
       {/* Benefits Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
+      <section className="py-16 md:py-24 bg-[#EBF5FB]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
           >
-            <h2 className="text-4xl mb-4 text-gray-900">Partner Benefits</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Unlock exclusive benefits designed to help you grow your business and serve your clients better
+            <h2 className="text-3xl md:text-5xl font-bold text-[#002855] mb-6">
+              Partner Benefits & Advantages
+            </h2>
+            <p className="text-[#5A6C7D] text-lg md:text-xl max-w-3xl mx-auto">
+              Join 500+ global partners who are growing their business with Tally Connect
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {benefits.map((benefit, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {partnerBenefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl p-8 border-2 border-gray-200 hover:border-[#00BCD4] hover:shadow-lg transition-all"
               >
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 border-gray-200">
-                  <CardContent className="p-6">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                      <benefit.icon className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">{benefit.title}</h3>
-                    <p className="text-gray-600">{benefit.description}</p>
-                  </CardContent>
-                </Card>
+                <div className="w-14 h-14 bg-gradient-to-br from-[#00BCD4] to-[#0066CC] rounded-xl flex items-center justify-center mb-4">
+                  <benefit.icon className="text-white" size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-[#002855] mb-3">
+                  {benefit.title}
+                </h3>
+                <p className="text-[#5A6C7D]">
+                  {benefit.description}
+                </p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Partnership Types */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-6">
+      {/* Partner Tiers */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
           >
-            <h2 className="text-4xl mb-4 text-gray-900">Partnership Programs</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Choose the partnership model that best fits your business
+            <h2 className="text-3xl md:text-5xl font-bold text-[#002855] mb-6">
+              Partnership Tiers
+            </h2>
+            <p className="text-[#5A6C7D] text-lg md:text-xl max-w-3xl mx-auto">
+              Choose the partnership level that matches your business goals
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
-            >
-              <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <Building2 className="w-6 h-6 text-blue-600" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {partnerTiers.map((tier, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:shadow-xl transition-all"
+              >
+                <div className={`bg-gradient-to-r ${tier.color} text-white py-6 px-8 text-center`}>
+                  <h3 className="text-2xl font-bold">{tier.name}</h3>
+                </div>
+                <div className="p-8">
+                  <div className="mb-6">
+                    <h4 className="font-bold text-[#002855] mb-3">Requirements:</h4>
+                    <ul className="space-y-2">
+                      {tier.requirements.map((req, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[#5A6C7D] text-sm">
+                          <CheckCircle className="text-[#00BCD4] flex-shrink-0 mt-0.5" size={16} />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <CardTitle>Reseller Partner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">
-                    Sell WorkTrackPro licenses to your clients and earn competitive margins on every sale.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Competitive pricing tiers</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Sales enablement tools</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Marketing support</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-            >
-              <Card className="h-full border-2 border-cyan-200 hover:border-cyan-400 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
-                    <Users className="w-6 h-6 text-cyan-600" />
+                  <div>
+                    <h4 className="font-bold text-[#002855] mb-3">Benefits:</h4>
+                    <ul className="space-y-2">
+                      {tier.benefits.map((benefit, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[#5A6C7D] text-sm">
+                          <CheckCircle className="text-[#00BCD4] flex-shrink-0 mt-0.5" size={16} />
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <CardTitle>Implementation Partner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">
-                    Help clients deploy and customize WorkTrackPro for their specific needs.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Technical training & certification</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Implementation methodologies</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Priority support</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.9, duration: 0.5 }}
-            >
-              <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                    <Globe className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <CardTitle>Technology Partner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-4">
-                    Integrate your solution with WorkTrackPro and expand your market reach.
-                  </p>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">API access & documentation</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Co-marketing opportunities</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Technical collaboration</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Application Form */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 to-cyan-50">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1.0, duration: 0.6 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="text-center mb-10">
-              <h2 className="text-4xl mb-4 text-gray-900">Partner Application Form</h2>
-              <p className="text-lg text-gray-600">
-                Fill out the form below and our partner team will contact you within 2-3 business days
-              </p>
+      <ApplicationForm />
+    </div>
+  );
+}
+
+// Application Form Component
+function ApplicationForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    phone: '',
+    country: '',
+    city: '',
+    website: '',
+    companySize: '',
+    businessType: '',
+    experience: '',
+    message: '',
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Mapping function for experience
+  const mapExperience = (exp: string) => {
+    switch (exp) {
+      case "0-2":
+        return "0-1";
+      case "3-5":
+        return "3-5";
+      case "6-10":
+        return "5-10";
+      case "10+":
+        return "10+";
+      default:
+        return "0-1";
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.company || !formData.phone) {
+      alert("Please fill in all required fields");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        contactInformation: {
+          fullName: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+        },
+
+        companyInformation: {
+          companyName: formData.company,
+          website: formData.website || "",
+          country: formData.country || "Not specified",
+          city: formData.city || "Not specified",
+        },
+
+        businessDetails: {
+          businessType: formData.businessType || "Other",
+          yearsInBusiness: formData.experience ? mapExperience(formData.experience) : "0-1",
+          numberOfEmployees: formData.companySize || "1-10",
+          existingClients: 0,
+        },
+
+        partnershipDetails: {
+          joinAs: "channel_partner", // Default to channel_partner for Workeye
+          motivation: formData.message || "No additional information provided",
+        },
+
+        source: "workeye",
+      };
+
+      console.log("Submitting partner application:", payload);
+
+      await submitPartnerApplication(payload);
+
+      alert("Thank you for your application! Our team will get back to you within 24 hours.");
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        company: '',
+        phone: '',
+        country: '',
+        city: '',
+        website: '',
+        companySize: '',
+        businessType: '',
+        experience: '',
+        message: '',
+      });
+
+    } catch (error: any) {
+      console.error("Partner application failed:", error);
+      console.error("Error response:", error.response?.data);
+      
+      const errorMessage = error.response?.data?.message 
+        || error.message 
+        || "Submission failed. Please try again.";
+      
+      alert(`Application submission failed: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  return (
+    <section className="py-16 md:py-24 bg-[#EBF5FB]">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold text-[#002855] mb-6">
+            Apply for Partnership
+          </h2>
+          <p className="text-[#5A6C7D] text-lg">
+            Fill out the form below and our team will get back to you within 24 hours
+          </p>
+        </motion.div>
+
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          viewport={{ once: true }}
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl p-8 shadow-lg"
+        >
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-[#002855] mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-[#002855] mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="john@example.com"
+                />
+              </div>
             </div>
 
-            <Card className="border-gray-200 shadow-xl">
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Personal Information */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-blue-600" />
-                      Personal Information
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name *</Label>
-                        <Input
-                          id="firstName"
-                          value={formData.firstName}
-                          onChange={(e) => handleInputChange('firstName', e.target.value)}
-                          placeholder="John"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name *</Label>
-                        <Input
-                          id="lastName"
-                          value={formData.lastName}
-                          onChange={(e) => handleInputChange('lastName', e.target.value)}
-                          placeholder="Doe"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          placeholder="john@company.com"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Phone Number *</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => handleInputChange('phone', e.target.value)}
-                          placeholder="+1 (555) 123-4567"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="company" className="block text-sm font-medium text-[#002855] mb-2">
+                  Company Name *
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  required
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="Your Company Ltd."
+                />
+              </div>
 
-                  {/* Company Information */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                      <Building2 className="w-5 h-5 text-blue-600" />
-                      Company Information
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="company">Company Name *</Label>
-                        <Input
-                          id="company"
-                          value={formData.company}
-                          onChange={(e) => handleInputChange('company', e.target.value)}
-                          placeholder="Your Company Inc."
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="website">Website</Label>
-                        <Input
-                          id="website"
-                          type="url"
-                          value={formData.website}
-                          onChange={(e) => handleInputChange('website', e.target.value)}
-                          placeholder="https://www.yourcompany.com"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="companySize">Company Size</Label>
-                        <Select value={formData.companySize} onValueChange={(value) => handleInputChange('companySize', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select company size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1-10">1-10 employees</SelectItem>
-                            <SelectItem value="11-50">11-50 employees</SelectItem>
-                            <SelectItem value="51-200">51-200 employees</SelectItem>
-                            <SelectItem value="201-500">201-500 employees</SelectItem>
-                            <SelectItem value="500+">500+ employees</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="country">Country</Label>
-                        <Input
-                          id="country"
-                          value={formData.country}
-                          onChange={(e) => handleInputChange('country', e.target.value)}
-                          placeholder="United States"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="state">State/Province</Label>
-                        <Input
-                          id="state"
-                          value={formData.state}
-                          onChange={(e) => handleInputChange('state', e.target.value)}
-                          placeholder="California"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          value={formData.city}
-                          onChange={(e) => handleInputChange('city', e.target.value)}
-                          placeholder="San Francisco"
-                        />
-                      </div>
-                    </div>
-                  </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-[#002855] mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+            </div>
 
-                  {/* Partnership Details */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                      <Handshake className="w-5 h-5 text-blue-600" />
-                      Partnership Details
-                    </h3>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="partnerType">Partner Type *</Label>
-                        <Select value={formData.partnerType} onValueChange={(value) => handleInputChange('partnerType', value)} required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select partner type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="reseller">Reseller Partner</SelectItem>
-                            <SelectItem value="implementation">Implementation Partner</SelectItem>
-                            <SelectItem value="technology">Technology Partner</SelectItem>
-                            <SelectItem value="consulting">Consulting Partner</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="industryFocus">Industry Focus</Label>
-                        <Input
-                          id="industryFocus"
-                          value={formData.industryFocus}
-                          onChange={(e) => handleInputChange('industryFocus', e.target.value)}
-                          placeholder="e.g., Healthcare, Finance, Technology"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="experience">Years of Experience</Label>
-                        <Select value={formData.experience} onValueChange={(value) => handleInputChange('experience', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select experience" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0-2">0-2 years</SelectItem>
-                            <SelectItem value="3-5">3-5 years</SelectItem>
-                            <SelectItem value="6-10">6-10 years</SelectItem>
-                            <SelectItem value="10+">10+ years</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="estimatedClients">Estimated Monthly Clients</Label>
-                        <Input
-                          id="estimatedClients"
-                          value={formData.estimatedClients}
-                          onChange={(e) => handleInputChange('estimatedClients', e.target.value)}
-                          placeholder="e.g., 10-20"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="currentSolutions">Current Solutions/Services Offered</Label>
-                        <Textarea
-                          id="currentSolutions"
-                          value={formData.currentSolutions}
-                          onChange={(e) => handleInputChange('currentSolutions', e.target.value)}
-                          placeholder="Describe the solutions and services you currently offer..."
-                          rows={3}
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <Label htmlFor="certifications">Relevant Certifications</Label>
-                        <Input
-                          id="certifications"
-                          value={formData.certifications}
-                          onChange={(e) => handleInputChange('certifications', e.target.value)}
-                          placeholder="List any relevant certifications"
-                        />
-                      </div>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="country" className="block text-sm font-medium text-[#002855] mb-2">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="United States"
+                />
+              </div>
 
-                  {/* Additional Information */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                      <Globe className="w-5 h-5 text-blue-600" />
-                      Additional Information
-                    </h3>
-                    <div>
-                      <Label htmlFor="message">Why do you want to become a WorkTrackPro partner?</Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={(e) => handleInputChange('message', e.target.value)}
-                        placeholder="Tell us about your interest in becoming a partner and how you plan to add value..."
-                        rows={4}
-                      />
-                    </div>
-                  </div>
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-[#002855] mb-2">
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="New York"
+                />
+              </div>
+            </div>
 
-                  {/* Terms and Conditions */}
-                  <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
-                    <Checkbox
-                      id="terms"
-                      checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) => handleInputChange('agreeToTerms', checked as boolean)}
-                    />
-                    <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
-                      I agree to the WorkTrackPro Partner Program terms and conditions. I understand that my application 
-                      will be reviewed and that acceptance into the partner program is subject to approval. *
-                    </label>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="website" className="block text-sm font-medium text-[#002855] mb-2">
+                  Company Website
+                </label>
+                <input
+                  type="url"
+                  id="website"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="https://yourcompany.com"
+                />
+              </div>
 
-                  {/* Submit Button */}
-                  <div className="flex gap-4">
-                    <button
-                      type="submit"
-                      className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      <Send className="w-5 h-5" />
-                      Submit Application
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onBackToPartners}
-                      className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Back to Partners
-                    </button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
+              <div>
+                <label htmlFor="companySize" className="block text-sm font-medium text-[#002855] mb-2">
+                  Company Size
+                </label>
+                <select
+                  id="companySize"
+                  name="companySize"
+                  value={formData.companySize}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                >
+                  <option value="">Select size</option>
+                  <option value="1-10">1-10 employees</option>
+                  <option value="11-50">11-50 employees</option>
+                  <option value="51-200">51-200 employees</option>
+                  <option value="201-500">201-500 employees</option>
+                  <option value="500+">500+ employees</option>
+                </select>
+              </div>
+            </div>
 
-      <Footer />
-    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="businessType" className="block text-sm font-medium text-[#002855] mb-2">
+                  Business Type
+                </label>
+                <select
+                  id="businessType"
+                  name="businessType"
+                  value={formData.businessType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                >
+                  <option value="">Select type</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Consulting">Consulting</option>
+                  <option value="Reseller">Reseller</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="experience" className="block text-sm font-medium text-[#002855] mb-2">
+                  Years of Experience
+                </label>
+                <select
+                  id="experience"
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                >
+                  <option value="">Select experience</option>
+                  <option value="0-2">0-2 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="6-10">6-10 years</option>
+                  <option value="10+">10+ years</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-[#002855] mb-2">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={4}
+                value={formData.message}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all resize-none"
+                placeholder="Tell us about your business and why you want to become a partner..."
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-[#00BCD4] to-[#0066CC] text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Submitting..." : "Submit Application"}
+            </button>
+          </div>
+        </motion.form>
+      </div>
+    </section>
   );
 }

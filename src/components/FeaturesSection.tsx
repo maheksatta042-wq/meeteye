@@ -1,6 +1,15 @@
-import { motion } from 'motion/react';
-import { Shield, Users, FileText, Settings, TrendingUp, Cloud } from 'lucide-react';
-
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Activity, 
+  Users, 
+  FileText, 
+  Settings, 
+  TrendingUp, 
+  Cloud, 
+  Shield, 
+  Camera 
+} from 'lucide-react';
 export function FeaturesSection() {
   const features = [
     {
@@ -76,7 +85,7 @@ export function FeaturesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              From tracking to analytics, our employee monitoring solutions are built to streamline every core function of your business. Whether you're managing remote teams or in-office staff, our flexible platform WorkTrackPro has got you covered with everything you need — and more.
+              From tracking to analytics, our employee monitoring solutions are built to streamline every core function of your business. Whether you're managing remote teams or in-office staff, our flexible platform WorkEye has got you covered with everything you need — and more.
             </motion.p>
 
             {/* Features List */}
@@ -105,17 +114,7 @@ export function FeaturesSection() {
               ))}
             </motion.div>
 
-            <motion.button 
-              className="bg-gradient-to-r from-[#00C4CC] to-[#0066CC] text-white px-8 py-3 rounded-lg hover:from-[#00B0BC] hover:to-[#0052A3] transition-all duration-300 shadow-lg hover:shadow-xl"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Explore More
-            </motion.button>
+            
           </motion.div>
 
           {/* Right Side - Illustration */}
@@ -137,40 +136,143 @@ export function FeaturesSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
-                  <div className="w-32 h-32 bg-gradient-to-br from-[#003366] to-[#0066CC] rounded-full flex items-center justify-center shadow-2xl">
-                    <div className="text-white text-6xl">▲</div>
+                  <div className="relative w-40 h-40 bg-gradient-to-br from-[#003366] via-[#0066CC] to-[#00C4CC] rounded-full flex items-center justify-center shadow-2xl overflow-hidden">
+                    {/* Animated gradient overlay */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-[#00C4CC]/30 via-transparent to-[#003366]/30"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    {/* Pulse rings */}
+                    <motion.div 
+                      className="absolute inset-0 border-4 border-white/30 rounded-full"
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                    <motion.div 
+                      className="absolute inset-0 border-4 border-white/20 rounded-full"
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0, 0.3] }}
+                      transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                    />
+                    
+                    {/* Inner glow circle */}
+                    <div className="relative w-28 h-28 bg-white/10 rounded-full backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
+                      {/* Triangle with glow effect */}
+                      <motion.div 
+                        className="relative"
+                        animate={{ 
+                          rotate: [0, 5, -5, 0],
+                          scale: [1, 1.05, 1]
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <div className="text-white text-6xl drop-shadow-2xl" style={{ filter: 'drop-shadow(0 0 20px rgba(0, 196, 204, 0.8))' }}>▲</div>
+                      </motion.div>
+                    </div>
+                    
+                    {/* Sparkle effects */}
+                    {[...Array(6)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1 h-1 bg-white rounded-full"
+                        style={{
+                          top: `${20 + Math.random() * 60}%`,
+                          left: `${20 + Math.random() * 60}%`,
+                        }}
+                        animate={{
+                          scale: [0, 1, 0],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.4,
+                        }}
+                      />
+                    ))}
                   </div>
-                  <div className="mt-2 text-center">
+                  
+                  {/* Animated dots below */}
+                  <div className="mt-4 text-center">
                     <div className="flex gap-2 justify-center">
                       <motion.div 
-                        className="w-2 h-2 bg-[#00C4CC] rounded-full"
-                        animate={{ scale: [1, 1.5, 1] }}
+                        className="w-2.5 h-2.5 bg-[#00C4CC] rounded-full shadow-lg"
+                        animate={{ scale: [1, 1.5, 1], y: [0, -4, 0] }}
                         transition={{ duration: 2, repeat: Infinity, delay: 0 }}
                       />
                       <motion.div 
-                        className="w-2 h-2 bg-[#0066CC] rounded-full"
-                        animate={{ scale: [1, 1.5, 1] }}
+                        className="w-2.5 h-2.5 bg-[#0066CC] rounded-full shadow-lg"
+                        animate={{ scale: [1, 1.5, 1], y: [0, -4, 0] }}
                         transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
                       />
                       <motion.div 
-                        className="w-2 h-2 bg-[#003366] rounded-full"
-                        animate={{ scale: [1, 1.5, 1] }}
+                        className="w-2.5 h-2.5 bg-[#003366] rounded-full shadow-lg"
+                        animate={{ scale: [1, 1.5, 1], y: [0, -4, 0] }}
                         transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
                       />
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Feature Icons in circular pattern */}
+                {/* Feature Icons in circular pattern - mapped to actual features */}
                 {[
-                  { icon: Shield, position: 'top-0 left-1/4', color: 'bg-blue-500', delay: 0.5 },
-                  { icon: Users, position: 'top-0 right-1/4', color: 'bg-purple-500', delay: 0.6 },
-                  { icon: FileText, position: 'top-1/3 right-0', color: 'bg-green-500', delay: 0.7 },
-                  { icon: Settings, position: 'bottom-1/3 right-0', color: 'bg-orange-500', delay: 0.8 },
-                  { icon: TrendingUp, position: 'bottom-0 right-1/4', color: 'bg-red-500', delay: 0.9 },
-                  { icon: Cloud, position: 'bottom-0 left-1/4', color: 'bg-cyan-500', delay: 1.0 },
-                  { icon: Shield, position: 'bottom-1/3 left-0', color: 'bg-indigo-500', delay: 1.1 },
-                  { icon: Users, position: 'top-1/3 left-0', color: 'bg-pink-500', delay: 1.2 },
+                  { 
+                    icon: Activity, 
+                    position: 'top-0 left-1/4', 
+                    color: 'bg-blue-500', 
+                    delay: 0.5,
+                    label: 'Real-Time Monitoring'
+                  },
+                  { 
+                    icon: Users, 
+                    position: 'top-0 right-1/4', 
+                    color: 'bg-purple-500', 
+                    delay: 0.6,
+                    label: 'Team Management'
+                  },
+                  { 
+                    icon: FileText, 
+                    position: 'top-1/3 right-0', 
+                    color: 'bg-green-500', 
+                    delay: 0.7,
+                    label: 'Reports'
+                  },
+                  { 
+                    icon: Settings, 
+                    position: 'bottom-1/3 right-0', 
+                    color: 'bg-orange-500', 
+                    delay: 0.8,
+                    label: 'Configuration'
+                  },
+                  { 
+                    icon: TrendingUp, 
+                    position: 'bottom-0 right-1/4', 
+                    color: 'bg-red-500', 
+                    delay: 0.9,
+                    label: 'Live Updates'
+                  },
+                  { 
+                    icon: Cloud, 
+                    position: 'bottom-0 left-1/4', 
+                    color: 'bg-cyan-500', 
+                    delay: 1.0,
+                    label: 'Cloud-Based'
+                  },
+                  { 
+                    icon: Shield, 
+                    position: 'bottom-1/3 left-0', 
+                    color: 'bg-indigo-500', 
+                    delay: 1.1,
+                    label: 'Security'
+                  },
+                  { 
+                    icon: Camera, 
+                    position: 'top-1/3 left-0', 
+                    color: 'bg-pink-500', 
+                    delay: 1.2,
+                    label: 'Screenshots'
+                  },
                 ].map((item, idx) => (
                   <motion.div 
                     key={idx} 
@@ -181,11 +283,62 @@ export function FeaturesSection() {
                     transition={{ duration: 0.5, delay: item.delay }}
                     whileHover={{ scale: 1.2, rotate: 10 }}
                   >
-                    <div className={`w-16 h-16 ${item.color} rounded-full flex items-center justify-center shadow-lg border-4 border-white cursor-pointer`}>
-                      <item.icon className="w-8 h-8 text-white" />
-                    </div>
+                    <motion.div 
+                      className={`w-16 h-16 ${item.color} rounded-full flex items-center justify-center shadow-lg border-4 border-white cursor-pointer relative`}
+                      animate={{ 
+                        y: [0, -10, 0],
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        delay: item.delay,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ 
+                          duration: 20, 
+                          repeat: Infinity, 
+                          ease: "linear" 
+                        }}
+                      >
+                        <item.icon className="w-8 h-8 text-white" />
+                      </motion.div>
+                      
+                      {/* Pulse effect */}
+                      <motion.div
+                        className={`absolute inset-0 ${item.color} rounded-full opacity-50`}
+                        animate={{ 
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 0, 0.5]
+                        }}
+                        transition={{ 
+                          duration: 2, 
+                          repeat: Infinity,
+                          delay: item.delay
+                        }}
+                      />
+                    </motion.div>
                   </motion.div>
                 ))}
+
+                {/* Connecting lines animation */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
+                  <motion.circle
+                    cx="50%"
+                    cy="50%"
+                    r="150"
+                    fill="none"
+                    stroke="#00C4CC"
+                    strokeWidth="2"
+                    strokeDasharray="5,5"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 0.3 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 2, delay: 1.3 }}
+                  />
+                </svg>
 
                 {/* Decorative elements */}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-8">

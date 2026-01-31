@@ -1,41 +1,42 @@
-import { useState } from 'react';
-import { Navbar } from './components/Navbar';
-import { TopBanner } from './components/TopBanner';
+import { useState } from "react";
+import { Navbar } from "./components/Navbar";
+import { TopBanner } from "./components/TopBanner";
 import { useNavigate } from "react-router-dom";
-import { HeroSection } from './components/HeroSection';
-import { FeaturesSection } from './components/FeaturesSection';
-import { ProductSection } from './components/ProductSection';
-import { PricingSection } from './components/PricingSection';
-import { WhyChooseUsSection } from './components/WhyChooseUsSection';
-import { PartnerProgramSection } from './components/PartnerProgramSection';
-import { FAQSection } from './components/FAQSection';
-import { Footer } from './components/Footer';
-import { LoginModal } from './components/LoginModal';
-import { CheckoutPage } from './components/CheckoutPage';
-import { HowItWorksSection } from './components/HowitWorks';
+import { HeroSection } from "./components/HeroSection";
+import { FeaturesSection } from "./components/FeaturesSection";
+import { ProductSection } from "./components/ProductSection";
+import { PricingSection } from "./components/PricingSection";
+import { WhyChooseUsSection } from "./components/WhyChooseUsSection";
+import { PartnersPage } from "./components/PartnersPage.tsx";
+import { FAQSection } from "./components/FAQSection";
+import { Footer } from "./components/Footer";
+import { LoginModal } from "./components/LoginModal";
+import { CheckoutPage } from "./components/CheckoutPage";
+import { HowItWorksSection } from "./components/HowitWorks";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { PaymentSuccess } from "./components/PaymentSuccess";
 import Tutorial_Page from "./components/Tutorial_Page";
 import { PartnerDashboard } from "./components/PartnerDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
+import { BecomePartnerPage } from "./components/BecomePartnerPage";
 
-type ViewState = 'landing' | 'checkout' | 'dashboard';
+type ViewState = "landing" | "checkout" | "dashboard";
 
 type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
 
 export default function App() {
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState<ViewState>('landing');
+  const [currentView, setCurrentView] = useState<ViewState>("landing");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
-  licenseId: string;
-  name: string;
-  price: string;
-  period: string;
-  billingCycle: BillingCycle;
-} | null>(null);
+    licenseId: string;
+    name: string;
+    price: string;
+    period: string;
+    billingCycle: BillingCycle;
+  } | null>(null);
   const [currentUser, setCurrentUser] = useState<{
-    type: 'partner' | 'admin' | null;
+    type: "partner" | "admin" | null;
     name: string;
   } | null>(null);
 
@@ -50,37 +51,37 @@ export default function App() {
     setIsLoginModalOpen(true);
   };
 
-  const handleLogin = (type: 'partner' | 'admin', name: string) => {
+  const handleLogin = (type: "partner" | "admin", name: string) => {
     setIsLoginModalOpen(false);
-    
+
     // If a plan was selected, show checkout page
     if (selectedPlan) {
       navigate("/checkout");
     } else {
       // Otherwise go directly to dashboard
       setCurrentUser({ type, name });
-      setCurrentView('dashboard');
+      setCurrentView("dashboard");
     }
   };
 
   const handlePaymentComplete = (_email: string) => {
-    setCurrentView('dashboard');
+    setCurrentView("dashboard");
   };
 
   const handlePaymentSuccess = () => {
-    setCurrentUser({ type: 'admin', name: 'User' });
-    setCurrentView('dashboard');
+    setCurrentUser({ type: "admin", name: "User" });
+    setCurrentView("dashboard");
     setSelectedPlan(null);
   };
 
   const handleBackToPricing = () => {
-    setCurrentView('landing');
+    setCurrentView("landing");
     setSelectedPlan(null);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setCurrentView('landing');
+    setCurrentView("landing");
     setSelectedPlan(null);
   };
 
@@ -109,9 +110,8 @@ export default function App() {
             <FeaturesSection />
             <HowItWorksSection />
             <ProductSection />
-            <PricingSection onPlanSelect={handlePlanSelect} />
             <WhyChooseUsSection />
-            <PartnerProgramSection />
+            <PricingSection onPlanSelect={handlePlanSelect} />
             <FAQSection />
             <Footer />
 
@@ -128,10 +128,7 @@ export default function App() {
       />
 
       {/* Tutorial */}
-    <Route
-     path="/tutorial"
-     element={<Tutorial_Page />}
-    />
+      <Route path="/tutorial" element={<Tutorial_Page />} />
 
       {/* Checkout */}
       <Route
@@ -150,10 +147,7 @@ export default function App() {
       />
 
       {/* Payment Success */}
-      <Route
-        path="/payment-success"
-        element={<PaymentSuccess />}
-      />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
 
       {/* Dashboard */}
       <Route
@@ -162,6 +156,48 @@ export default function App() {
           <div className="min-h-screen flex items-center justify-center">
             <h1 className="text-3xl font-bold">Welcome to WorkEye Dashboard</h1>
           </div>
+        }
+      />
+
+      {/* Partners Page */}
+      <Route
+        path="/partners"
+        element={
+          <PartnersPage
+            onBecomePartnerClick={() => navigate("/become-partner")}
+            onPartnerLoginClick={() => setIsLoginModalOpen(true)}
+            onBackToHome={() => navigate("/")}
+            onNavigateToSection={(section) => {
+              navigate("/");
+              setTimeout(() => {
+                const element = document.querySelector(`#${section}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 100);
+            }}
+          />
+        }
+      />
+
+      {/* Become Partner Page */}
+      <Route
+        path="/become-partner"
+        element={
+          <BecomePartnerPage
+            onBackToPartners={() => navigate("/partners")}
+            onPartnerLoginClick={() => setIsLoginModalOpen(true)}
+            onBackToHome={() => navigate("/")}
+            onNavigateToSection={(section) => {
+              navigate("/");
+              setTimeout(() => {
+                const element = document.querySelector(`#${section}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 100);
+            }}
+          />
         }
       />
     </Routes>

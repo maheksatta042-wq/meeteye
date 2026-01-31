@@ -92,7 +92,7 @@ export function PaymentGatewayPage({ selectedPlan, onSuccess }: PaymentGatewayPa
                     Your {selectedPlan.name} plan is now active
                   </p>
                   <p className="text-gray-500">
-                    Welcome to WorkTrackPro! You're all set to start tracking.
+                    Welcome to WorkEye! You're all set to start tracking.
                   </p>
                 </div>
 

@@ -10,7 +10,7 @@ export function HeroSection({ onLoginClick }: HeroSectionProps) {
   return (
     <section
       id="home"
-      className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white"
+      className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white border-b border-gray-200"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-14 items-center">
@@ -41,7 +41,7 @@ export function HeroSection({ onLoginClick }: HeroSectionProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              Streamline operations, boost productivity, and scale faster with WorkTrackPro — trusted by SMEs and enterprises across industries for comprehensive workforce monitoring and analytics.
+              Streamline operations, boost productivity, and scale faster with WorkEye — trusted by SMEs and enterprises across industries for comprehensive workforce monitoring and analytics.
             </motion.p>
 
             {/* CTA Button */}
@@ -51,13 +51,7 @@ export function HeroSection({ onLoginClick }: HeroSectionProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-[#00C4CC] to-[#0066CC] hover:from-[#00B0BC] hover:to-[#0052A3] text-white px-8 text-base shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={onLoginClick}
-              >
-                Get a Demo
-              </Button>
+              
             </motion.div>
           </motion.div>
 

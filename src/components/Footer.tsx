@@ -14,7 +14,7 @@ export function Footer() {
       content: `Last Updated: December 12, 2025
 
 1. Information We Collect
-WorkTrackPro collects employee activity data including cursor movements, application usage, browser activity, system events, and screenshots as configured by your organization's administrator.
+WorkEye collects employee activity data including cursor movements, application usage, browser activity, system events, and screenshots as configured by your organization's administrator.
 
 2. How We Use Your Information
 - Monitor employee productivity and activity during work hours
@@ -37,17 +37,17 @@ We use essential cookies for authentication and session management. Real-time up
 7. Changes to This Policy
 We may update this privacy policy periodically. Material changes will be communicated to administrators.
 
-For questions about our privacy practices, contact: privacy@worktrackpro.com`,
+For questions about our privacy practices, contact: privacy@workeye.com`,
     },
     terms: {
       title: 'Terms of Service',
       content: `Last Updated: December 12, 2025
 
 1. Acceptance of Terms
-By accessing or using WorkTrackPro, you agree to be bound by these Terms of Service and all applicable laws and regulations.
+By accessing or using WorkEye, you agree to be bound by these Terms of Service and all applicable laws and regulations.
 
 2. Service Description
-WorkTrackPro provides comprehensive employee tracking software including:
+WorkEye provides comprehensive employee tracking software including:
 - Real-time cursor/idle detection (1-minute intervals)
 - Application and browser activity monitoring
 - Automated screenshot capture (configurable intervals)
@@ -60,7 +60,7 @@ WorkTrackPro provides comprehensive employee tracking software including:
 - Account credentials must be kept secure and confidential
 
 4. Acceptable Use
-You agree to use WorkTrackPro only for:
+You agree to use WorkEye only for:
 - Legitimate workforce monitoring purposes
 - Compliance with applicable employment laws
 - Improving organizational productivity
@@ -71,7 +71,7 @@ You agree to use WorkTrackPro only for:
 - Using the service to violate employee privacy rights beyond legal monitoring
 
 6. Data Ownership
-You retain ownership of all data collected through WorkTrackPro. We provide the platform and infrastructure but do not claim ownership of your tracking data.
+You retain ownership of all data collected through WorkEye. We provide the platform and infrastructure but do not claim ownership of your tracking data.
 
 7. Service Availability
 We strive for 99.9% uptime but do not guarantee uninterrupted service. Scheduled maintenance will be communicated in advance.
@@ -85,12 +85,12 @@ We strive for 99.9% uptime but do not guarantee uninterrupted service. Scheduled
 We reserve the right to suspend or terminate accounts that violate these terms or engage in fraudulent activity.
 
 10. Limitation of Liability
-WorkTrackPro is provided "as is" without warranties. We are not liable for any indirect, incidental, or consequential damages.
+WorkEye is provided "as is" without warranties. We are not liable for any indirect, incidental, or consequential damages.
 
 11. Governing Law
 These terms are governed by the laws of the State of California, United States.
 
-For questions about these terms, contact: legal@worktrackpro.com`,
+For questions about these terms, contact: legal@workeye.com`,
     },
     cookie: {
       title: 'Cookie Policy',
@@ -100,7 +100,7 @@ For questions about these terms, contact: legal@worktrackpro.com`,
 Cookies are small text files stored on your device that help us provide and improve our services.
 
 2. How We Use Cookies
-WorkTrackPro uses the following types of cookies:
+WorkEye uses the following types of cookies:
 
 Essential Cookies (Required)
 - Authentication and session management
@@ -119,7 +119,7 @@ Analytics Cookies
 - Generating usage statistics for administrators
 
 3. Server-Sent Events (SSE)
-WorkTrackPro uses Server-Sent Events for real-time dashboard updates instead of traditional polling. This is not a cookie but provides similar real-time functionality.
+WorkEye uses Server-Sent Events for real-time dashboard updates instead of traditional polling. This is not a cookie but provides similar real-time functionality.
 
 4. Third-Party Cookies
 We do not use third-party advertising cookies. Any third-party cookies are limited to:
@@ -134,7 +134,7 @@ You can control cookies through your browser settings:
 - Safari: Preferences > Privacy > Cookies
 - Edge: Settings > Privacy > Cookies
 
-Note: Disabling essential cookies may prevent WorkTrackPro from functioning properly.
+Note: Disabling essential cookies may prevent WorkEye from functioning properly.
 
 6. Cookie Duration
 - Session cookies: Deleted when you close your browser
@@ -144,14 +144,14 @@ Note: Disabling essential cookies may prevent WorkTrackPro from functioning prop
 7. Updates to Cookie Policy
 We may update this policy to reflect changes in our cookie usage. Check this page periodically for updates.
 
-For questions about our cookie practices, contact: privacy@worktrackpro.com`,
+For questions about our cookie practices, contact: privacy@workeye.com`,
     },
     security: {
       title: 'Security',
       content: `Last Updated: December 12, 2025
 
 1. Our Security Commitment
-WorkTrackPro takes the security of your data seriously. We implement industry-standard security measures to protect employee tracking data.
+WorkEye takes the security of your data seriously. We implement industry-standard security measures to protect employee tracking data.
 
 2. Data Encryption
 - All data transmitted between trackers and servers uses TLS 1.3 encryption
@@ -216,14 +216,14 @@ We comply with:
 
 12. Responsible Disclosure
 If you discover a security vulnerability, please report it to:
-security@worktrackpro.com
+security@workeye.com
 
 We maintain a responsible disclosure program and will acknowledge receipt within 24 hours.
 
 13. Security Updates
 This security policy is reviewed and updated quarterly to reflect our evolving security practices.
 
-For security questions or to report issues, contact: security@worktrackpro.com`,
+For security questions or to report issues, contact: security@workeye.com`,
     },
   };
 
@@ -266,7 +266,7 @@ For security questions or to report issues, contact: security@worktrackpro.com`,
             </Button>
           </div>
           <div className="text-center text-gray-500 text-xs sm:text-sm mt-6">
-            <p>&copy; {new Date().getFullYear()} WorkTrackPro. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} WorkEye. All rights reserved.</p>
           </div>
         </div>
       </footer>
