@@ -80,10 +80,10 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   };
 
   const getBillingText = () => {
-    if (billingCycle === "monthly") return "/month";
-    if (billingCycle === "quarterly") return "/quarter";
-    if (billingCycle === "half-yearly") return "/6 months";
-    return "/year";
+    if (billingCycle === "monthly") return "/user/month";
+    if (billingCycle === "quarterly") return "/user/quarter";
+    if (billingCycle === "half-yearly") return "/user/6 months";
+    return "/user/year";
   };
 
   const getDiscountText = () => {
@@ -119,7 +119,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     const loadPlans = async () => {
       try {
         const res = await fetch(
-          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",
@@ -144,7 +144,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
               name: lic.licenseType.name,
               icon: uiMeta.icon || Star,
               basePrice: priceAmount ?? 0,
-              period: priceAmount === null ? "contact sales" : "per user/month",
+              period: priceAmount === null ? "contact sales" : "",
               description:
                 lic.licenseType.description ||
                 "Flexible plan for your organization",

@@ -44,7 +44,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     const fetchPlanDetails = async () => {
       try {
         const res = await fetch(
-          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",
