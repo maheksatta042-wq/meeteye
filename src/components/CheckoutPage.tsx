@@ -44,7 +44,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     const fetchPlanDetails = async () => {
       try {
         const res = await fetch(
-          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",
@@ -240,12 +240,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         return;
       }
 
-      // Map UI billing cycles to backend billing cycles
-      const backendBillingCycle = 
-        billingCycle === "quarterly" || billingCycle === "half-yearly" 
-          ? "monthly" 
-          : billingCycle;
-
       const totalAmount = calculateTotal();
       const amountInPaise = totalAmount * 100;
 
@@ -265,7 +259,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           name: loggedInUser.name,
           email: loggedInUser.email,
           licenseId,
-          billingCycle: "monthly",
+          billingCycle: billingCycle,
           amount: 0,
           currency: "INR",
         });
@@ -284,7 +278,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         name: loggedInUser.name,
         email: loggedInUser.email,
         licenseId,
-        billingCycle: backendBillingCycle,
+        billingCycle: billingCycle,
         amount: calculateTotal(),
         currency: "INR",
       });
@@ -420,9 +414,18 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           <div className="mb-6 pb-6 border-b border-gray-200">
             <p className="text-sm text-gray-600 mb-3">Selected Plan</p>
             <p className="text-lg font-semibold text-gray-900 mb-2">{planDetails.planName}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Users className="h-4 w-4" />
-              <span>Includes {planDetails.includedUsers} users</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Users className="h-4 w-4" />
+                <span>Includes {planDetails.includedUsers} users</span>
+              </div>
+              {/* ✅ ADD: Show selected billing cycle */}
+              <div className="flex items-center gap-2 text-sm font-medium text-green-700 bg-green-50 px-3 py-1.5 rounded-md w-fit">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{getBillingLabel()} Billing Selected</span>
+              </div>
             </div>
           </div>
 

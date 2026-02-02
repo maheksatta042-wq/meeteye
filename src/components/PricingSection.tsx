@@ -102,7 +102,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
       onPlanSelect({
         licenseId: plan.id,
         name: plan.name,
-        price: String(getPrice(plan)),
+        price: String(plan.basePrice),
         period: plan.period,
         billingCycle,
       });
@@ -119,7 +119,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     const loadPlans = async () => {
       try {
         const res = await fetch(
-          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",
