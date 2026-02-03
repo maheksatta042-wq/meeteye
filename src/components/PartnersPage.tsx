@@ -33,7 +33,7 @@ const partners: Partner[] = [
     location: "New York, NY",
     badge: "PLATINUM",
     description:
-      "Award-winning WorkTrackPro Platinum Partner with over 15 years of expertise in workforce management consultation, customization, API integration, and mobile apps integration to enhance your digital experience.",
+      "Award-winning Workeye Platinum Partner with over 15 years of expertise in workforce management consultation, customization, API integration, and mobile apps integration to enhance your digital experience.",
     specialties: [
       "Custom Integration",
       "Enterprise Solutions",
@@ -48,7 +48,7 @@ const partners: Partner[] = [
     location: "San Francisco, Los Angeles, Seattle, WA",
     badge: "GOLD",
     description:
-      "A proficient workforce consulting firm empowering organizations with expert guidance and customized WorkTrackPro solutions, driving efficient digital transformations to achieve their business goals.",
+      "A proficient workforce consulting firm empowering organizations with expert guidance and customized Workeye solutions, driving efficient digital transformations to achieve their business goals.",
     specialties: ["Strategy Consulting", "Process Optimization", "Analytics"],
     certifications: ["Certified Consultant"],
   },
@@ -59,7 +59,7 @@ const partners: Partner[] = [
     location: "Chicago, IL",
     badge: "GOLD",
     description:
-      "Leading technology partner specializing in WorkTrackPro implementations for large enterprises, offering comprehensive solutions from planning to deployment and ongoing support.",
+      "Leading technology partner specializing in Workeye implementations for large enterprises, offering comprehensive solutions from planning to deployment and ongoing support.",
     specialties: [
       "Enterprise Deployment",
       "System Integration",
@@ -74,7 +74,7 @@ const partners: Partner[] = [
     location: "Austin, Dallas, Houston, TX",
     badge: "SILVER",
     description:
-      "Dedicated to helping businesses optimize their workforce management through WorkTrackPro implementation, training, and continuous improvement initiatives.",
+      "Dedicated to helping businesses optimize their workforce management through Workeye implementation, training, and continuous improvement initiatives.",
     specialties: ["Implementation", "Training Programs", "Support Services"],
   },
   {
@@ -84,7 +84,7 @@ const partners: Partner[] = [
     location: "Boston, MA",
     badge: "GOLD",
     description:
-      "Certified WorkTrackPro reseller providing comprehensive workforce management solutions with focus on productivity enhancement and employee engagement.",
+      "Certified Workeye reseller providing comprehensive workforce management solutions with focus on productivity enhancement and employee engagement.",
     specialties: ["Sales & Licensing", "Implementation", "Customer Success"],
     certifications: ["Certified Reseller"],
   },
@@ -95,7 +95,7 @@ const partners: Partner[] = [
     location: "Miami, Orlando, Tampa, FL",
     badge: "SILVER",
     description:
-      "Strategic consulting partner helping organizations transform their workforce management practices through innovative WorkTrackPro solutions and best practices.",
+      "Strategic consulting partner helping organizations transform their workforce management practices through innovative Workeye solutions and best practices.",
     specialties: [
       "Change Management",
       "Workflow Design",
@@ -160,7 +160,7 @@ export function PartnersPage({
             transition={{ delay: 0.2, duration: 0.6 }}
             className="text-5xl md:text-6xl mb-6"
           >
-            Find a WorkTrackPro Partner in your area!
+            Find a Workeye Partner in your area!
           </motion.h1>
         </div>
       </motion.section>
@@ -192,17 +192,17 @@ export function PartnersPage({
             className="max-w-4xl mx-auto text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl mb-6 text-gray-900">
-              WorkTrackPro Partners can help you create and manage your
+              Workeye Partners can help you create and manage your
               workforce!
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Our partners are there to make your WorkTrackPro experience more
+              Our partners are there to make your Workeye experience more
               pleasant and productive – from choosing a subscription plan to
               product implementation, customization, and employee training.
-              WorkTrackPro partners can also help you set up an integration with
+              Workeye partners can also help you set up an integration with
               a third-party app or service. Browse our Partner Directory to find
-              a WorkTrackPro partner in your area and contact them directly or
-              use the form below to get a price estimate for your WorkTrackPro
+              a Workeye partner in your area and contact them directly or
+              use the form below to get a price estimate for your Workeye
               implementation project.
             </p>
           </motion.div>

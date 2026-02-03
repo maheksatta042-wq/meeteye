@@ -72,13 +72,13 @@ export function Navbar({
       {/* TOP WHITE NAVBAR */}
       <nav className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex h-16 items-center justify-between">
+          <div className="flex h-20 items-center justify-between">
             {/* Logo */}
             <div
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
               onClick={handleLogoClick}
             >
-              <div className="h-10 w-36 flex items-center justify-center">
+              <div className="h-12 w-40 flex items-center justify-start">
                 <img
                   src={logoImage}
                   alt="WorkEye Logo"

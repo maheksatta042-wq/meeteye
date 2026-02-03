@@ -93,7 +93,7 @@ export function BecomePartnerPage({
       </section>
 
       {/* Tabs */}
-      <div className="bg-[#00BCD4] sticky top-16 md:top-20 z-40">
+      <div className="bg-[#00BCD4] sticky top-[88px] z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
             <div className="flex-1 md:flex-none px-8 py-4 text-center bg-white text-[#002855] font-medium border-b-4 border-white">
@@ -101,7 +101,7 @@ export function BecomePartnerPage({
             </div>
             <Link
               to="/partners"
-              className="flex-1 md:flex-none px-8 py-4 text-center text-white hover:bg-white/10 transition-colors font-medium border-b-4 border-transparent hover:border-white"
+              className="flex-1 md:flex-none px-8 py-4 text-center text-black hover:bg-white/10 transition-colors font-medium border-b-4 border-transparent hover:border-white"
             >
               Partner directory
             </Link>
@@ -136,7 +136,7 @@ export function BecomePartnerPage({
                 viewport={{ once: true }}
                 className="bg-white rounded-2xl p-8 border-2 border-gray-200 hover:border-[#00BCD4] hover:shadow-lg transition-all"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-[#00BCD4] to-[#0066CC] rounded-xl flex items-center justify-center mb-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#0066CC] to-[#0066CC] rounded-xl flex items-center justify-center mb-4">
                   <benefit.icon className="text-white" size={28} />
                 </div>
                 <h3 className="text-xl font-bold text-[#002855] mb-3">
@@ -179,7 +179,7 @@ export function BecomePartnerPage({
                 viewport={{ once: true }}
                 className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:shadow-xl transition-all"
               >
-                <div className={`bg-gradient-to-r ${tier.color} text-white py-6 px-8 text-center`}>
+                <div className={`bg-[#00BCD4] text-white py-6 px-8 text-center`}>
                   <h3 className="text-2xl font-bold">{tier.name}</h3>
                 </div>
                 <div className="p-8">
@@ -591,7 +591,7 @@ function ApplicationForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-[#00BCD4] to-[#0066CC] text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#0066CC] to-[#0066CC] text-white py-4 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Submitting..." : "Submit Application"}
             </button>
