@@ -71,7 +71,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
   const getPrice = (plan: UIPlan) => {
-    if (plan.isFree || plan.isEnterprise) return plan.basePrice;
+    if (plan.isFree) return plan.basePrice;
 
     if (billingCycle === "monthly") return plan.basePrice;
     if (billingCycle === "quarterly") return (plan.basePrice * 3 * 0.95); // 5% discount
@@ -82,7 +82,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   const getBillingText = () => {
     if (billingCycle === "monthly") return "/user/month";
     if (billingCycle === "quarterly") return "/user/quarter";
-    if (billingCycle === "half-yearly") return "/user/6 months";
+    if (billingCycle === "half-yearly") return "/user/half-yearly";
     return "/user/year";
   };
 
@@ -119,7 +119,7 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
     const loadPlans = async () => {
       try {
         const res = await fetch(
-          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",

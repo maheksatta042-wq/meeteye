@@ -34,7 +34,6 @@ export function HeroSection({ onLoginClick }: HeroSectionProps) {
                 for Growing Businesses
               </span>
             </motion.h1>
-
             <motion.p 
               className="text-lg text-gray-600 max-w-xl leading-relaxed"
               initial={{ opacity: 0, y: 20 }}

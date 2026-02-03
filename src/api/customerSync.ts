@@ -6,6 +6,7 @@ interface SyncCustomerPayload {
   name: string;
   email: string;
   source: string;
+  password: string;
 } 
 
 export const syncCustomer = async (data: SyncCustomerPayload) => {

@@ -122,7 +122,7 @@ export function BecomePartnerPage({
               Partner Benefits & Advantages
             </h2>
             <p className="text-[#5A6C7D] text-lg md:text-xl max-w-3xl mx-auto">
-              Join 500+ global partners who are growing their business with Tally Connect
+              Join 500+ global partners who are growing their business with Workeye
             </p>
           </motion.div>
 
@@ -218,32 +218,42 @@ export function BecomePartnerPage({
   );
 }
 
-// Application Form Component
+// Application Form Component - Updated to match Callifo structure
 function ApplicationForm() {
   const [formData, setFormData] = useState({
-    name: '',
+    companyName: '',
+    contactName: '',
     email: '',
-    company: '',
     phone: '',
     country: '',
     city: '',
     website: '',
     companySize: '',
-    businessType: '',
+    partnerType: '',
     experience: '',
     message: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mapping function for experience
+  // Mapping functions to match API requirements (same as Callifo)
+  const mapPartnerType = (type: string) => {
+    if (type === "distributor") {
+      return "distributor";
+    }
+    // All other types (reseller, implementation, technology, referral) are channel partners
+    return "channel_partner";
+  };
+
   const mapExperience = (exp: string) => {
     switch (exp) {
-      case "0-2":
+      case "0-1":
         return "0-1";
+      case "1-3":
+        return "1-3";
       case "3-5":
         return "3-5";
-      case "6-10":
+      case "5-10":
         return "5-10";
       case "10+":
         return "10+";
@@ -252,12 +262,29 @@ function ApplicationForm() {
     }
   };
 
+  const mapBusinessType = (partnerType: string) => {
+    switch (partnerType) {
+      case "technology":
+        return "Technology";
+      case "reseller":
+        return "Reseller";
+      case "implementation":
+        return "Consulting";
+      case "referral":
+        return "Other";
+      default:
+        return "Other";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     // Validate required fields
-    if (!formData.name || !formData.email || !formData.company || !formData.phone) {
+    if (!formData.companyName || !formData.contactName || !formData.email || 
+        !formData.phone || !formData.country || !formData.city || 
+        !formData.companySize || !formData.partnerType || !formData.experience) {
       alert("Please fill in all required fields");
       setIsSubmitting(false);
       return;
@@ -266,27 +293,27 @@ function ApplicationForm() {
     try {
       const payload = {
         contactInformation: {
-          fullName: formData.name,
+          fullName: formData.contactName,
           email: formData.email,
           phone: formData.phone,
         },
 
         companyInformation: {
-          companyName: formData.company,
+          companyName: formData.companyName,
           website: formData.website || "",
-          country: formData.country || "Not specified",
-          city: formData.city || "Not specified",
+          country: formData.country,
+          city: formData.city,
         },
 
         businessDetails: {
-          businessType: formData.businessType || "Other",
-          yearsInBusiness: formData.experience ? mapExperience(formData.experience) : "0-1",
-          numberOfEmployees: formData.companySize || "1-10",
+          businessType: mapBusinessType(formData.partnerType),
+          yearsInBusiness: mapExperience(formData.experience),
+          numberOfEmployees: formData.companySize,
           existingClients: 0,
         },
 
         partnershipDetails: {
-          joinAs: "channel_partner", // Default to channel_partner for Workeye
+          joinAs: mapPartnerType(formData.partnerType),
           motivation: formData.message || "No additional information provided",
         },
 
@@ -297,19 +324,19 @@ function ApplicationForm() {
 
       await submitPartnerApplication(payload);
 
-      alert("Thank you for your application! Our team will get back to you within 24 hours.");
+      alert("Thank you for your interest! We'll review your application and get back to you within 48 hours.");
       
       // Reset form
       setFormData({
-        name: '',
+        companyName: '',
+        contactName: '',
         email: '',
-        company: '',
         phone: '',
         country: '',
         city: '',
         website: '',
         companySize: '',
-        businessType: '',
+        partnerType: '',
         experience: '',
         message: '',
       });
@@ -349,7 +376,7 @@ function ApplicationForm() {
             Apply for Partnership
           </h2>
           <p className="text-[#5A6C7D] text-lg">
-            Fill out the form below and our team will get back to you within 24 hours
+            Fill out the form below and our team will get back to you within 48 hours
           </p>
         </motion.div>
 
@@ -364,21 +391,39 @@ function ApplicationForm() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-[#002855] mb-2">
-                  Full Name *
+                <label htmlFor="companyName" className="block text-sm font-medium text-[#002855] mb-2">
+                  Company Name *
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
+                  id="companyName"
+                  name="companyName"
                   required
-                  value={formData.name}
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
+                  placeholder="Your Company Ltd."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="contactName" className="block text-sm font-medium text-[#002855] mb-2">
+                  Contact Name *
+                </label>
+                <input
+                  type="text"
+                  id="contactName"
+                  name="contactName"
+                  required
+                  value={formData.contactName}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
                   placeholder="John Doe"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[#002855] mb-2">
                   Email Address *
@@ -392,24 +437,6 @@ function ApplicationForm() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
                   placeholder="john@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-[#002855] mb-2">
-                  Company Name *
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  required
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
-                  placeholder="Your Company Ltd."
                 />
               </div>
 
@@ -433,12 +460,13 @@ function ApplicationForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-[#002855] mb-2">
-                  Country
+                  Country *
                 </label>
                 <input
                   type="text"
                   id="country"
                   name="country"
+                  required
                   value={formData.country}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
@@ -448,12 +476,13 @@ function ApplicationForm() {
 
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-[#002855] mb-2">
-                  City
+                  City *
                 </label>
                 <input
                   type="text"
                   id="city"
                   name="city"
+                  required
                   value={formData.city}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
@@ -480,11 +509,12 @@ function ApplicationForm() {
 
               <div>
                 <label htmlFor="companySize" className="block text-sm font-medium text-[#002855] mb-2">
-                  Company Size
+                  Company Size *
                 </label>
                 <select
                   id="companySize"
                   name="companySize"
+                  required
                   value={formData.companySize}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
@@ -501,39 +531,43 @@ function ApplicationForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="businessType" className="block text-sm font-medium text-[#002855] mb-2">
-                  Business Type
+                <label htmlFor="partnerType" className="block text-sm font-medium text-[#002855] mb-2">
+                  Partner Type *
                 </label>
                 <select
-                  id="businessType"
-                  name="businessType"
-                  value={formData.businessType}
+                  id="partnerType"
+                  name="partnerType"
+                  required
+                  value={formData.partnerType}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
                 >
                   <option value="">Select type</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Consulting">Consulting</option>
-                  <option value="Reseller">Reseller</option>
-                  <option value="Other">Other</option>
+                  <option value="reseller">Reseller Partner</option>
+                  <option value="distributor">Distributor</option>
+                  <option value="implementation">Implementation Partner</option>
+                  <option value="technology">Technology Partner</option>
+                  <option value="referral">Referral Partner</option>
                 </select>
               </div>
 
               <div>
                 <label htmlFor="experience" className="block text-sm font-medium text-[#002855] mb-2">
-                  Years of Experience
+                  Years of Experience *
                 </label>
                 <select
                   id="experience"
                   name="experience"
+                  required
                   value={formData.experience}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
                 >
                   <option value="">Select experience</option>
-                  <option value="0-2">0-2 years</option>
+                  <option value="0-1">0-1 years</option>
+                  <option value="1-3">1-3 years</option>
                   <option value="3-5">3-5 years</option>
-                  <option value="6-10">6-10 years</option>
+                  <option value="5-10">5-10 years</option>
                   <option value="10+">10+ years</option>
                 </select>
               </div>
@@ -541,7 +575,7 @@ function ApplicationForm() {
 
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-[#002855] mb-2">
-                Message
+                Additional Information
               </label>
               <textarea
                 id="message"
@@ -550,7 +584,7 @@ function ApplicationForm() {
                 value={formData.message}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all resize-none"
-                placeholder="Tell us about your business and why you want to become a partner..."
+                placeholder="Tell us why you want to become a partner and what makes your company unique..."
               />
             </div>
 

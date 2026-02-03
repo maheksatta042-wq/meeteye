@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { ArrowLeft, Lock, Users } from 'lucide-react';
+import { ArrowLeft, Lock, Users, Building, Mail, Phone, MapPin, FileText, CheckCircle } from 'lucide-react';
 import { Logo } from './Logo';
 import { createOrder, verifyPayment } from "../api/payment";
 import { checkCustomerExists, syncCustomer } from "../api/customerSync";
@@ -12,7 +12,7 @@ interface CheckoutPageProps {
   selectedPlan: {
     licenseId: string;
     name: string;
-    price: string; // This is the price per user per month from pricing page
+    price: string;
     period: string;
     billingCycle: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
@@ -24,7 +24,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   const navigate = useNavigate();
   type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
   
-  // Initialize with the billing cycle that was selected on the pricing page
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(selectedPlan.billingCycle || "yearly");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -34,17 +33,39 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     planName: string;
   } | null>(null);
 
+  // Billing form state
+  const [billingForm, setBillingForm] = useState({
+    companyName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    gstNumber: '',
+  });
+
   const loggedInUser: {
     name?: string;
     email?: string;
   } = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // Fetch plan details including user count
+  // Pre-fill email from logged in user
+  useEffect(() => {
+    if (loggedInUser?.email) {
+      setBillingForm(prev => ({
+        ...prev,
+        email: loggedInUser.email || '',
+      }));
+    }
+  }, [loggedInUser?.email]);
+
+  // Fetch plan details
   useEffect(() => {
     const fetchPlanDetails = async () => {
       try {
         const res = await fetch(
-          "http://localhost:4000/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
+          "https://lisence-system.onrender.com/api/license/public/licenses-by-product/69589e3fe70228ef3c25f26c",
           {
             headers: {
               "x-api-key": "my-secret-key-123",
@@ -53,7 +74,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         );
 
         const data = await res.json();
-
         const matched = data.licenses.find(
           (lic: any) => lic?._id === selectedPlan.licenseId
         );
@@ -62,17 +82,9 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           throw new Error("Selected plan not found");
         }
 
-        console.log("📦 Matched License:", matched);
-        console.log("🎯 License Type:", matched.licenseType);
-        console.log("✨ Raw Features:", matched.licenseType.features);
-
-        // Extract user count from features
-        let userCount = 1; // Default fallback
+        let userCount = 1;
         const rawFeatures = matched.licenseType.features || [];
 
-        console.log("🔍 Features type:", typeof rawFeatures, "isArray:", Array.isArray(rawFeatures));
-        
-        // Handle array format (feature registry)
         if (Array.isArray(rawFeatures)) {
           const userFeatures = [];
           
@@ -82,15 +94,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
               const key = (feature.featureKey || "").toLowerCase();
               const slug = (feature.featureSlug || "").toLowerCase();
               const value = feature.limitValue ?? feature.value;
-              
-              console.log("🔍 Checking feature:", { 
-                label, 
-                key, 
-                slug, 
-                type: feature.featureType, 
-                value: value,
-                displayName: feature.displayName 
-              });
               
               if (feature.featureType === "limit" && typeof value === "number") {
                 const isUserFeature = 
@@ -106,18 +109,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                     value: value,
                     priority: (slug === "user-limit" || key === "user-limit") ? 1 : 2
                   });
-                  console.log("✅ Found potential user feature:", { key: slug || key, value: value });
                 }
-              }
-            } else if (typeof feature === "string") {
-              const match = feature.match(/(\d+)\s*users?/i);
-              if (match) {
-                userFeatures.push({
-                  key: "string-match",
-                  value: parseInt(match[1]),
-                  priority: 1
-                });
-                console.log("✅ Found users in string feature:", match[1]);
               }
             }
           }
@@ -128,19 +120,12 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
               return b.value - a.value;
             });
             userCount = userFeatures[0].value;
-            console.log("✅ Selected user count:", userCount, "from:", userFeatures[0].key);
           }
-        } 
-        // Handle object format (validatedFeatureMap)
-        else if (typeof rawFeatures === "object" && rawFeatures !== null) {
-          console.log("🔍 Processing features as object/map");
+        } else if (typeof rawFeatures === "object" && rawFeatures !== null) {
           const userFeatures = [];
           
           for (const [slug, value] of Object.entries(rawFeatures)) {
             const slugLower = slug.toLowerCase();
-            
-            console.log("🔍 Checking feature key:", slug, "value:", value, "type:", typeof value);
-            
             const isUserFeature = 
               slugLower === "user-limit" || 
               slugLower === "users" || 
@@ -153,7 +138,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                 value: value,
                 priority: (slugLower === "user-limit" || slugLower === "users") ? 1 : 2
               });
-              console.log("✅ Found potential user feature:", slug, "=", value);
             }
           }
           
@@ -163,11 +147,8 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
               return b.value - a.value;
             });
             userCount = userFeatures[0].value;
-            console.log("✅ Selected user count:", userCount, "from key:", userFeatures[0].key);
           }
         }
-
-        console.log("🎯 Final user count:", userCount);
 
         setPlanDetails({
           pricePerUser: Number(selectedPlan.price),
@@ -184,16 +165,13 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     fetchPlanDetails();
   }, [selectedPlan.licenseId, selectedPlan.price, selectedPlan.name]);
 
-  // Calculate base monthly cost (price per user × number of users)
   const getMonthlyBaseCost = () => {
     if (!planDetails) return 0;
     return planDetails.pricePerUser * planDetails.includedUsers;
   };
 
-  // Calculate subtotal based on billing cycle BEFORE discount
   const calculateSubtotal = () => {
     const monthlyBase = getMonthlyBaseCost();
-    
     if (billingCycle === "monthly") return monthlyBase;
     if (billingCycle === "quarterly") return monthlyBase * 3;
     if (billingCycle === "half-yearly") return monthlyBase * 6;
@@ -202,28 +180,38 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
   const calculateDiscount = () => {
     const subtotal = calculateSubtotal();
-    if (billingCycle === "quarterly") {
-      return subtotal * 0.05; // 5% discount for quarterly
-    } else if (billingCycle === "half-yearly") {
-      return subtotal * 0.10; // 10% discount for half-yearly
-    } else if (billingCycle === "yearly") {
-      return subtotal * 0.20; // 20% discount for yearly
-    }
+    if (billingCycle === "quarterly") return subtotal * 0.05;
+    if (billingCycle === "half-yearly") return subtotal * 0.10;
+    if (billingCycle === "yearly") return subtotal * 0.20;
     return 0;
   };
 
   const calculateTax = () => {
     const subtotalAfterDiscount = calculateSubtotal() - calculateDiscount();
-    return Math.round(subtotalAfterDiscount * 0.18); // 18% GST
+    return Math.round(subtotalAfterDiscount * 0.18);
   };
 
   const calculateTotal = () => {
     return Math.round(calculateSubtotal() - calculateDiscount() + calculateTax());
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBillingForm({
+      ...billingForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting || !planDetails) return;
+
+    // Validate required fields
+    if (!billingForm.companyName || !billingForm.email || !billingForm.phone) {
+      alert("Please fill in all required fields (Company Name, Email, Phone)");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -242,16 +230,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
       const totalAmount = calculateTotal();
       const amountInPaise = totalAmount * 100;
-
-      const exists = await checkCustomerExists(loggedInUser.email);
-      if (!exists) {
-        await syncCustomer({
-          name: loggedInUser.name,
-          email: loggedInUser.email,
-          source: "WorkEye",
-        });
-      }
-
       const isStarterPlan = planDetails.pricePerUser === 0;
 
       if (isStarterPlan) {
@@ -329,8 +307,9 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           }
         },
         prefill: {
-          name: loggedInUser.name,
-          email: loggedInUser.email,
+          name: billingForm.companyName,
+          email: billingForm.email,
+          contact: billingForm.phone,
         },
         theme: { color: "#0f172a" },
       });
@@ -351,10 +330,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     return "12 months";
   };
 
-  const getPeriodText = () => {
-    return "month";
-  };
-
   const getDiscountText = () => {
     if (billingCycle === "quarterly") return "5%";
     if (billingCycle === "half-yearly") return "10%";
@@ -365,7 +340,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   const getBillingLabel = () => {
     if (billingCycle === "quarterly") return "Quarterly";
     if (billingCycle === "half-yearly") return "Half-Yearly";
-    if (billingCycle === "yearly") return "Annual";
+    if (billingCycle === "yearly") return "Yearly";
     return "Monthly";
   };
 
@@ -381,232 +356,333 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Logo />
-            <Button
-              variant="ghost"
-              className="text-gray-600 hover:text-gray-900"
-              onClick={onBack}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </div>
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <Button
+            variant="ghost"
+            className="text-gray-600 hover:text-gray-900 -ml-2"
+            onClick={onBack}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go Back
+          </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center">
-              <svg className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <rect x="3" y="5" width="18" height="14" rx="2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Checkout</h2>
-          </div>
-
-          <div className="mb-6 pb-6 border-b border-gray-200">
-            <p className="text-sm text-gray-600 mb-3">Selected Plan</p>
-            <p className="text-lg font-semibold text-gray-900 mb-2">{planDetails.planName}</p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="h-4 w-4" />
-                <span>Includes {planDetails.includedUsers} users</span>
-              </div>
-              {/* ✅ ADD: Show selected billing cycle */}
-              <div className="flex items-center gap-2 text-sm font-medium text-green-700 bg-green-50 px-3 py-1.5 rounded-md w-fit">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{getBillingLabel()} Billing Selected</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3 mb-6">
-            <div 
-              onClick={() => setBillingCycle('yearly')}
-              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                billingCycle === 'yearly' 
-                  ? 'border-green-600 bg-green-50 shadow-sm' 
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  billingCycle === 'yearly' 
-                    ? 'border-green-600 bg-white' 
-                    : 'border-gray-300'
-                }`}>
-                  {billingCycle === 'yearly' && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
-                  )}
-                </div>
-                <span className={`font-medium ${
-                  billingCycle === 'yearly' ? 'text-gray-900' : 'text-gray-700'
-                }`}>
-                  Annual Billing
-                </span>
-              </div>
-              <span className="text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded">
-                Save 20%
-              </span>
-            </div>
-
-            <div 
-              onClick={() => setBillingCycle('half-yearly')}
-              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                billingCycle === 'half-yearly' 
-                  ? 'border-green-600 bg-green-50 shadow-sm' 
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  billingCycle === 'half-yearly' 
-                    ? 'border-green-600 bg-white' 
-                    : 'border-gray-300'
-                }`}>
-                  {billingCycle === 'half-yearly' && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
-                  )}
-                </div>
-                <span className={`font-medium ${
-                  billingCycle === 'half-yearly' ? 'text-gray-900' : 'text-gray-700'
-                }`}>
-                  Half-Yearly Billing
-                </span>
-              </div>
-              <span className="text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded">
-                Save 10%
-              </span>
-            </div>
-
-            <div 
-              onClick={() => setBillingCycle('quarterly')}
-              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                billingCycle === 'quarterly' 
-                  ? 'border-green-600 bg-green-50 shadow-sm' 
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  billingCycle === 'quarterly' 
-                    ? 'border-green-600 bg-white' 
-                    : 'border-gray-300'
-                }`}>
-                  {billingCycle === 'quarterly' && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
-                  )}
-                </div>
-                <span className={`font-medium ${
-                  billingCycle === 'quarterly' ? 'text-gray-900' : 'text-gray-700'
-                }`}>
-                  Quarterly Billing
-                </span>
-              </div>
-              <span className="text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded">
-                Save 5%
-              </span>
-            </div>
-            
-            <div 
-              onClick={() => setBillingCycle('monthly')}
-              className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                billingCycle === 'monthly' 
-                  ? 'border-green-600 bg-green-50 shadow-sm' 
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  billingCycle === 'monthly' 
-                    ? 'border-green-600 bg-white' 
-                    : 'border-gray-300'
-                }`}>
-                  {billingCycle === 'monthly' && (
-                    <div className="h-2.5 w-2.5 rounded-full bg-green-600" />
-                  )}
-                </div>
-                <span className={`font-medium ${
-                  billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-700'
-                }`}>
-                  Monthly Billing
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
-            <div className="flex justify-between text-gray-700">
-              <span>Price per user/month</span>
-              <span>₹{planDetails.pricePerUser.toFixed(0)}</span>
-            </div>
-            
-            <div className="flex justify-between text-gray-700">
-              <span>Number of users</span>
-              <span>×{planDetails.includedUsers}</span>
-            </div>
-            
-            <div className="flex justify-between text-gray-600 text-sm">
-              <span>Billing period</span>
-              <span>{getDurationText()}</span>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-3 mt-3" />
-            
-            <div className="flex justify-between text-gray-700 font-medium">
-              <span>Subtotal</span>
-              <span>₹{calculateSubtotal().toFixed(0)}</span>
-            </div>
-            
-            {getDiscountText() && (
-              <div className="flex justify-between text-green-700 font-medium">
-                <span>{getBillingLabel()} Discount ({getDiscountText()})</span>
-                <span>-₹{calculateDiscount().toFixed(0)}</span>
-              </div>
-            )}
-            
-            <div className="flex justify-between text-gray-700">
-              <span>Tax (18% GST)</span>
-              <span>₹{calculateTax().toFixed(0)}</span>
-            </div>
-          </div>
-
-          <div className="flex justify-between mb-6">
-            <span className="text-xl font-semibold text-gray-900">Total</span>
-            <span className="text-2xl font-bold text-gray-900">₹{calculateTotal().toFixed(0)}</span>
-          </div>
-          
-          <p className="text-xs text-gray-500 text-center mb-6">
-            Including all applicable taxes
-          </p>
-
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium h-12 text-base rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing...
-              </span>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                <Lock className="h-4 w-4" />
-                Proceed to Payment
-              </span>
-            )}
-          </Button>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Page Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Order</h1>
+          <p className="text-gray-600">Just one step away from transforming your business</p>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column - Billing Information */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Billing Information</h2>
+                <p className="text-sm text-gray-600 mb-6">Enter your company and billing details</p>
+
+                <div className="space-y-4">
+                  {/* Company Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Company Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                     
+                      <input
+                        type="text"
+                        name="companyName"
+                        value={billingForm.companyName}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="Enter company name"
+                        className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email and Phone */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Email Address <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        
+                        <input
+                          type="email"
+                          name="email"
+                          value={billingForm.email}
+                          onChange={handleInputChange}
+                          required
+                          readOnly
+                          placeholder="iiiiik@gmail.com"
+                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 bg-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={billingForm.phone}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="+91 98765 43210"
+                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Address <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                     
+                      <input
+                        type="text"
+                        name="address"
+                        value={billingForm.address}
+                        onChange={handleInputChange}
+                        placeholder="Street address"
+                        className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* City and State */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        City <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={billingForm.city}
+                        onChange={handleInputChange}
+                        placeholder="City"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        State <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={billingForm.state}
+                        onChange={handleInputChange}
+                        placeholder="State"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pincode and GST */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Pincode <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="pincode"
+                        value={billingForm.pincode}
+                        onChange={handleInputChange}
+                        placeholder="400001"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        GST Number (Optional)
+                      </label>
+                      <div className="relative">
+                       
+                        <input
+                          type="text"
+                          name="gstNumber"
+                          value={billingForm.gstNumber}
+                          onChange={handleInputChange}
+                          placeholder="22AAAAA0000A1Z5"
+                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Proceed Button (Mobile) */}
+                <div className="lg:hidden mt-6">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#003366] hover:bg-[#002244] text-white font-medium h-12 text-base rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Processing...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        Proceed to Payment
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+
+                {/* Selected Plan */}
+                <div className="mb-4 pb-4 border-b border-gray-200">
+                  <p className="text-sm text-gray-600 mb-2">Selected Plan</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">{planDetails.planName}</span>
+                    <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-1 rounded">
+                      {getBillingLabel()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                    <Users className="h-4 w-4" />
+                    <span>Includes {planDetails.includedUsers} users</span>
+                  </div>
+                </div>
+
+                {/* Billing Cycle */}
+                <div className="mb-4 pb-4 border-b border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Billing Cycle</p>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'monthly', label: 'Monthly', discount: '' },
+                      { value: 'quarterly', label: 'Quarterly', discount: '-5%' },
+                      { value: 'half-yearly', label: 'Half-Yearly', discount: '-10%' },
+                      { value: 'yearly', label: 'Yearly', discount: '-20%' },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setBillingCycle(option.value as BillingCycle)}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg border transition-all ${
+                          billingCycle === option.value
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="font-medium">{option.label}</span>
+                        {option.discount && (
+                          <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                            {option.discount}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Price per user/month</span>
+                    <span>₹{planDetails.pricePerUser}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Number of users</span>
+                    <span>×{planDetails.includedUsers}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Billing period</span>
+                    <span>{getDurationText()}</span>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium text-gray-900">₹{calculateSubtotal().toFixed(0)}</span>
+                  </div>
+                  {getDiscountText() && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600">GST (18%)</span>
+                      <span className="font-medium text-green-600">₹{calculateTax().toFixed(0)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Total */}
+                <div className="pt-4 border-t-2 border-gray-200 mb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-900">Total Amount</span>
+                    <span className="text-2xl font-bold text-gray-900">₹{calculateTotal().toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Security Icons */}
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Secure payment processing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Money-back guarantee</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span>Cancel anytime</span>
+                  </div>
+                </div>
+
+                {/* Proceed Button (Desktop) */}
+                <div className="hidden lg:block mt-6">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-[#003366] hover:bg-[#002244] text-white font-medium h-12 text-base rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Processing...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        Proceed to Payment
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

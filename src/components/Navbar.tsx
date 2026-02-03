@@ -3,10 +3,11 @@ import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import logoImage from "./assets/workeye.jpg";
+
 interface NavbarProps {
   onLoginClick: () => void;
   onNavigateToSection?: (section: string) => void;
-  onLogoClick?: () => void; // Add this
+  onLogoClick?: () => void;
 }
 
 type NavLinkType = "section" | "route";
@@ -75,7 +76,7 @@ export function Navbar({
             {/* Logo */}
             <div
               className="flex items-center cursor-pointer"
-              onClick={handleLogoClick} // Changed from onClick={() => navigate("/")}
+              onClick={handleLogoClick}
             >
               <div className="h-10 w-36 flex items-center justify-center">
                 <img
@@ -112,9 +113,7 @@ export function Navbar({
               </div>
 
               <Button
-                onClick={() => {
-                  window.location.href = "https://frontend-8x7e.onrender.com/";
-                }}
+                onClick={onLoginClick}
                 className="bg-[#003366] hover:bg-[#002244] text-white px-6 py-2 rounded-md font-medium"
               >
                 Login
@@ -143,7 +142,7 @@ export function Navbar({
                 <button
                   key={link.name}
                   onClick={() => handleNavClick(link.href, link.type)}
-                  className="text-sm font-medium text-gray-700 hover:text-[#003366]"
+                  className="block w-full text-left text-sm font-medium text-gray-700 hover:text-[#003366]"
                 >
                   {link.name}
                 </button>

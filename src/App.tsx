@@ -28,6 +28,7 @@ export default function App() {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<ViewState>("landing");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loginTriggeredFromPlan, setLoginTriggeredFromPlan] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
     licenseId: string;
     name: string;
@@ -48,19 +49,27 @@ export default function App() {
     billingCycle: BillingCycle;
   }) => {
     setSelectedPlan(plan);
-    setIsLoginModalOpen(true);
+    
+    // Check if user is already logged in
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      // User is logged in, go directly to checkout
+      navigate("/checkout");
+    } else {
+      // User not logged in, show login modal
+      setLoginTriggeredFromPlan(true);
+      setIsLoginModalOpen(true);
+    }
   };
 
   const handleLogin = (type: "partner" | "admin", name: string) => {
     setIsLoginModalOpen(false);
+    setCurrentUser({ type, name });
 
-    // If a plan was selected, show checkout page
-    if (selectedPlan) {
+    // If login was triggered from plan selection, navigate to checkout
+    if (loginTriggeredFromPlan && selectedPlan) {
+      setLoginTriggeredFromPlan(false);
       navigate("/checkout");
-    } else {
-      // Otherwise go directly to dashboard
-      setCurrentUser({ type, name });
-      setCurrentView("dashboard");
     }
   };
 
@@ -75,7 +84,7 @@ export default function App() {
   };
 
   const handleBackToPricing = () => {
-    setCurrentView("landing");
+    navigate("/");
     setSelectedPlan(null);
   };
 
@@ -104,9 +113,19 @@ export default function App() {
         path="/"
         element={
           <div className="min-h-screen bg-white">
-            <Navbar onLoginClick={() => setIsLoginModalOpen(true)} />
+            <Navbar 
+              onLoginClick={() => {
+                setLoginTriggeredFromPlan(false);
+                setIsLoginModalOpen(true);
+              }} 
+            />
             <TopBanner />
-            <HeroSection onLoginClick={() => setIsLoginModalOpen(true)} />
+            <HeroSection 
+              onLoginClick={() => {
+                setLoginTriggeredFromPlan(false);
+                setIsLoginModalOpen(true);
+              }} 
+            />
             <FeaturesSection />
             <HowItWorksSection />
             <ProductSection />
@@ -120,8 +139,10 @@ export default function App() {
               onClose={() => {
                 setIsLoginModalOpen(false);
                 setSelectedPlan(null);
+                setLoginTriggeredFromPlan(false);
               }}
               onLogin={handleLogin}
+              fromPlanSelection={loginTriggeredFromPlan}
             />
           </div>
         }
@@ -165,7 +186,10 @@ export default function App() {
         element={
           <PartnersPage
             onBecomePartnerClick={() => navigate("/become-partner")}
-            onPartnerLoginClick={() => setIsLoginModalOpen(true)}
+            onPartnerLoginClick={() => {
+              setLoginTriggeredFromPlan(false);
+              setIsLoginModalOpen(true);
+            }}
             onBackToHome={() => navigate("/")}
             onNavigateToSection={(section) => {
               navigate("/");
@@ -186,7 +210,10 @@ export default function App() {
         element={
           <BecomePartnerPage
             onBackToPartners={() => navigate("/partners")}
-            onPartnerLoginClick={() => setIsLoginModalOpen(true)}
+            onPartnerLoginClick={() => {
+              setLoginTriggeredFromPlan(false);
+              setIsLoginModalOpen(true);
+            }}
             onBackToHome={() => navigate("/")}
             onNavigateToSection={(section) => {
               navigate("/");
