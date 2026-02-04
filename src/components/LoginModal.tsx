@@ -4,14 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { toast } from 'sonner';
-import { syncCustomer, checkCustomerExists } from "../api/customerSync";
+import { syncCustomer, checkCustomerExists, loginCustomer } from "../api/customerSync";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogin: (type: "partner" | "admin", name: string) => void;
-  fromPlanSelection?: boolean; // New prop to know if opened from pricing
+  fromPlanSelection?: boolean;
 }
 
 export function LoginModal({ 
@@ -21,130 +20,149 @@ export function LoginModal({
   fromPlanSelection = false
 }: LoginModalProps) {
   const [isSignUp, setIsSignUp] = useState(false);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const checkActiveLicense = async (email: string): Promise<boolean> => {
-    try {
-      console.log('Checking active license for:', email);
-      const response = await fetch(
-        `https://lisence-system.onrender.com/api/external/actve-license/${email}?productId=69589e3fe70228ef3c25f26c`,
-        {
-          headers: {
-            "x-api-key": "my-secret-key-123",
-          },
-        }
-      );
-
-      console.log('License check response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('License check response data:', data);
-        
-        // Check if activeLicense exists and status is 'active'
-        const hasLicense = data.activeLicense && data.activeLicense.status === 'active';
-        console.log('Has active license:', hasLicense);
-        return hasLicense;
-      }
-      console.log('License check failed - response not ok');
-      return false;
-    } catch (error) {
-      console.error("Error checking active license:", error);
-      return false;
-    }
-  };
-
-  const handlePostLoginActions = async (email: string, userName: string) => {
-    // If login was triggered from plan selection (Buy Now), just close modal
-    // The App component will handle navigation to checkout
+  const handlePostLoginActions = (email: string, userName: string) => {
+    // Trigger custom event to update Navbar immediately
+    window.dispatchEvent(new Event('userLoggedIn'));
+    
+    // If login was triggered from plan selection (Buy Now), navigate to checkout
     if (fromPlanSelection) {
       onLogin("admin", userName);
       onClose();
       return;
     }
 
-    // Otherwise, check for active license and redirect accordingly
-    const hasActiveLicense = await checkActiveLicense(email);
-
-    // Close the modal first
+    // Otherwise, just close the modal and let user stay on current page
     onClose();
-
-    // Small delay to ensure modal closes before action
-    setTimeout(() => {
-      if (hasActiveLicense) {
-        // Redirect to dashboard
-        window.location.href = "https://frontend-8x7e.onrender.com/";
-      } else {
-        // Navigate to pricing section
-        const pricingSection = document.querySelector('#pricing');
-        if (pricingSection) {
-          pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    }, 100);
+    onLogin("admin", userName);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password || (isSignUp && !name)) {
-      toast.error("Please fill in all fields");
+      alert("Please fill in all fields");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       // SIGN UP
       if (isSignUp) {
-        await syncCustomer({ name, email, source: "workeye",password  });
+        try {
+          console.log("Attempting signup...");
+          const response = await syncCustomer({ name, email, source: "workeye", password });
+          
 
-        const user = {
-          name: name || email.split("@")[0],
-          email,
-          role: "admin",
-        };
+          const user = {
+            name: name || email.split("@")[0],
+            email,
+            role: "admin",
+            customerId: response.customerId,
+          };
 
-        localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("user", JSON.stringify(user));
 
-        toast.success("Account created successfully 🎉");
-        
-        // Check for active license after signup
-        await handlePostLoginActions(email, user.name);
-        return;
+          alert("Account created successfully! 🎉");
+          
+          setIsSubmitting(false); // Reset loading state
+          handlePostLoginActions(email, user.name);
+          return;
+        } catch (signupError: any) {
+          console.error("Signup error:", signupError);
+          setIsSubmitting(false); // IMPORTANT: Reset loading state
+          
+          if (signupError.response?.data?.message) {
+            alert(signupError.response.data.message);
+          } else if (signupError.message) {
+            alert(signupError.message);
+          } else {
+            alert("Failed to create account. Please try again.");
+          }
+          return;
+        }
       }
 
       // SIGN IN
-      const exists = await checkCustomerExists(email);
+      try {
+        const exists = await checkCustomerExists(email);
+        console.log("Email exists?", exists);
 
-      if (!exists) {
-        alert("Account not found. Please create an account.");
-        setIsSignUp(true);
-        return;
+        if (!exists) {
+          setIsSubmitting(false); // Reset loading state
+          alert("Account not found. Please create an account.");
+          setIsSignUp(true);
+          return;
+        }
+
+        // Email exists, now verify password
+   
+        const loginResponse = await loginCustomer({ email, password });
+
+        if (loginResponse.success && loginResponse.customer) {
+          const user = {
+            name: loginResponse.customer.name,
+            email: loginResponse.customer.email,
+            role: "admin",
+            customerId: loginResponse.customer.customerId,
+          };
+
+          localStorage.setItem("user", JSON.stringify(user));
+
+          alert("Login successful! Welcome back, " + user.name + "! 👋");
+          
+          setIsSubmitting(false); // Reset loading state
+          handlePostLoginActions(user.email, user.name);
+        } else {
+          setIsSubmitting(false); // Reset loading state
+          alert("Invalid credentials. Please check your password.");
+        }
+      } catch (loginError: any) {
+        console.error("Login error:", loginError);
+        setIsSubmitting(false); // IMPORTANT: Reset loading state
+        
+        if (loginError.response?.status === 401) {
+          alert("Invalid credentials. Incorrect password.");
+        } else if (loginError.response?.data?.message) {
+          alert(loginError.response.data.message);
+        } else if (loginError.message) {
+          alert(loginError.message);
+        } else {
+          alert("Login failed. Please try again.");
+        }
       }
 
-      const user = {
-        name: email.split("@")[0],
-        email,
-        role: "admin",
-      };
-
-      localStorage.setItem("user", JSON.stringify(user));
-
-      toast.success("Welcome back 👋");
-      
-      // Check for active license after login
-      await handlePostLoginActions(email, user.name);
-
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Something went wrong");
+      console.error("General error:", err);
+      setIsSubmitting(false); // IMPORTANT: Always reset loading state
+      
+      if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      } else if (err.message) {
+        alert(err.message);
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    if (!isSubmitting) {
+      setName("");
+      setEmail("");
+      setPassword("");
+      setIsSignUp(false);
+      onClose();
     }
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleCloseModal}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl text-center">
@@ -168,6 +186,7 @@ export function LoginModal({
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isSubmitting}
               />
             </div>
           )}
@@ -180,6 +199,7 @@ export function LoginModal({
               placeholder="admin@workeye.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -191,6 +211,7 @@ export function LoginModal({
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -199,7 +220,8 @@ export function LoginModal({
               <button
                 type="button"
                 className="text-blue-600 hover:underline"
-                onClick={() => toast.info("Password reset coming soon")}
+                onClick={() => alert("Password reset feature coming soon")}
+                disabled={isSubmitting}
               >
                 Forgot password?
               </button>
@@ -209,8 +231,19 @@ export function LoginModal({
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            disabled={isSubmitting}
           >
-            {isSignUp ? "Create Account" : "Login"}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {isSignUp ? "Creating Account..." : "Logging in..."}
+              </span>
+            ) : (
+              <span>{isSignUp ? "Create Account" : "Login"}</span>
+            )}
           </Button>
 
           <div className="text-center text-sm">
@@ -221,6 +254,7 @@ export function LoginModal({
                   type="button"
                   onClick={() => setIsSignUp(false)}
                   className="text-blue-600 hover:underline"
+                  disabled={isSubmitting}
                 >
                   Sign in
                 </button>
@@ -232,6 +266,7 @@ export function LoginModal({
                   type="button"
                   onClick={() => setIsSignUp(true)}
                   className="text-blue-600 hover:underline"
+                  disabled={isSubmitting}
                 >
                   Create one
                 </button>

@@ -6,7 +6,7 @@ import { createOrder, verifyPayment } from "../api/payment";
 import { checkCustomerExists, syncCustomer } from "../api/customerSync";
 import { loadRazorpay } from "../utils/loadRazorpay";
 import { purchaseLicense } from "../api/license";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface CheckoutPageProps {
   selectedPlan: {
@@ -22,6 +22,8 @@ interface CheckoutPageProps {
 
 export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: CheckoutPageProps) {
   const navigate = useNavigate();
+  const { userId } = useParams(); // Get userId from URL
+  
   type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
   
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(selectedPlan.billingCycle || "yearly");
@@ -247,6 +249,10 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
           starterUsed: true,
         };
         localStorage.setItem("user", JSON.stringify(updatedUser));
+        
+        // Clear selected plan from sessionStorage
+        sessionStorage.removeItem("selectedPlan");
+        
         alert("Free plan activated successfully 🎉");
         window.location.replace("https://frontend-8x7e.onrender.com/");
         return;
@@ -301,6 +307,10 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
             });
+            
+            // Clear selected plan from sessionStorage
+            sessionStorage.removeItem("selectedPlan");
+            
             navigate(`/payment-success?txn=${purchaseRes.transactionId}`);
           } catch (err) {
             alert("Payment verification failed. Contact support.");
@@ -359,7 +369,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Button
             variant="ghost"
             className="text-gray-600 hover:text-gray-900 -ml-2"
@@ -368,6 +378,8 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go Back
           </Button>
+          
+          
         </div>
       </div>
 
@@ -394,7 +406,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                       Company Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                     
                       <input
                         type="text"
                         name="companyName"
@@ -402,7 +413,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                         onChange={handleInputChange}
                         required
                         placeholder="Enter company name"
-                        className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -414,7 +425,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                         Email Address <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
-                        
                         <input
                           type="email"
                           name="email"
@@ -423,7 +433,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                           required
                           readOnly
                           placeholder="iiiiik@gmail.com"
-                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 bg-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                          className="w-full px-4 py-2.5 border border-gray-300 bg-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -433,7 +443,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                         Phone Number <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
-                        
                         <input
                           type="tel"
                           name="phone"
@@ -441,7 +450,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                           onChange={handleInputChange}
                           required
                           placeholder="+91 98765 43210"
-                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -450,17 +459,16 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                   {/* Address */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Address <span className="text-red-500">*</span>
+                      Address
                     </label>
                     <div className="relative">
-                     
                       <input
                         type="text"
                         name="address"
                         value={billingForm.address}
                         onChange={handleInputChange}
                         placeholder="Street address"
-                        className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -469,7 +477,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        City <span className="text-red-500">*</span>
+                        City
                       </label>
                       <input
                         type="text"
@@ -483,7 +491,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        State <span className="text-red-500">*</span>
+                        State
                       </label>
                       <input
                         type="text"
@@ -500,7 +508,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Pincode <span className="text-red-500">*</span>
+                        Pincode
                       </label>
                       <input
                         type="text"
@@ -517,14 +525,13 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                         GST Number (Optional)
                       </label>
                       <div className="relative">
-                       
                         <input
                           type="text"
                           name="gstNumber"
                           value={billingForm.gstNumber}
                           onChange={handleInputChange}
                           placeholder="22AAAAA0000A1Z5"
-                          className="w-full px-4 pl-14 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                         />
                       </div>
                     </div>

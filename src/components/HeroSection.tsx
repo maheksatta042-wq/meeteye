@@ -28,11 +28,11 @@ export function HeroSection({ onLoginClick }: HeroSectionProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <span className="text-[#00C4CC] font-bold text-5xl lg:text-6xl">Smarter</span>{' '}
-              <span className="text-[#003366] font-bold text-5xl lg:text-6xl">Employee Tracking Solutions</span>
+              <span className="text-[#00C4CC] font-bold text-5xl lg:text-6xl" style={{ fontWeight: 700 }}>Smarter </span>{' '}
+              <span className="text-[#003366] font-bold text-5xl lg:text-6xl" style={{ fontWeight: 700 }}>Employee Tracking Solutions</span>
                 <br />
-              <span className="text-[#003366] font-bold text-5xl lg:text-6xl">for </span>
-              <span className="text-[#00C4CC] font-bold text-5xl lg:text-6xl">Growing Businesses</span>
+              <span className="text-[#003366] font-bold text-5xl lg:text-6xl" style={{ fontWeight: 700 }}>for </span>
+              <span className="text-[#00C4CC] font-bold text-5xl lg:text-6xl" style={{ fontWeight: 700 }}>Growing Businesses</span>
               
             </motion.h1> 
 

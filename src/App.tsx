@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { TopBanner } from "./components/TopBanner";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +41,18 @@ export default function App() {
     name: string;
   } | null>(null);
 
+  // Load selected plan from sessionStorage on mount
+  useEffect(() => {
+    const savedPlan = sessionStorage.getItem("selectedPlan");
+    if (savedPlan) {
+      try {
+        setSelectedPlan(JSON.parse(savedPlan));
+      } catch (e) {
+        console.error("Failed to parse saved plan", e);
+      }
+    }
+  }, []);
+
   const handlePlanSelect = (plan: {
     licenseId: string;
     name: string;
@@ -50,11 +62,16 @@ export default function App() {
   }) => {
     setSelectedPlan(plan);
     
+    // Save plan to sessionStorage so it persists across login
+    sessionStorage.setItem("selectedPlan", JSON.stringify(plan));
+    
     // Check if user is already logged in
     const userStr = localStorage.getItem("user");
     if (userStr) {
-      // User is logged in, go directly to checkout
-      navigate("/checkout");
+      // User is logged in, go directly to checkout with user ID
+      const user = JSON.parse(userStr);
+      const userId = user.customerId;
+      navigate(`/checkout/${userId}`);
     } else {
       // User not logged in, show login modal
       setLoginTriggeredFromPlan(true);
@@ -66,14 +83,23 @@ export default function App() {
     setIsLoginModalOpen(false);
     setCurrentUser({ type, name });
 
-    // If login was triggered from plan selection, navigate to checkout
-    if (loginTriggeredFromPlan && selectedPlan) {
+    // If login was triggered from plan selection, navigate to checkout with user ID
+    if (loginTriggeredFromPlan) {
       setLoginTriggeredFromPlan(false);
-      navigate("/checkout");
+      
+      // Get user from localStorage to extract ID
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const userId = user.customerId;
+        navigate(`/checkout/${userId}`);
+      }
     }
   };
 
   const handlePaymentComplete = (_email: string) => {
+    // Clear selected plan from sessionStorage after payment
+    sessionStorage.removeItem("selectedPlan");
     setCurrentView("dashboard");
   };
 
@@ -81,29 +107,20 @@ export default function App() {
     setCurrentUser({ type: "admin", name: "User" });
     setCurrentView("dashboard");
     setSelectedPlan(null);
+    sessionStorage.removeItem("selectedPlan");
   };
 
   const handleBackToPricing = () => {
     navigate("/");
-    setSelectedPlan(null);
+    // Don't clear the plan here, in case user wants to come back
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentView("landing");
     setSelectedPlan(null);
+    sessionStorage.removeItem("selectedPlan");
   };
-
-  // // Show dashboards
-  // if (currentView === 'dashboard') {
-  //   if (currentUser?.type === 'partner') {
-  //     return <PartnerDashboard userName={currentUser.name} onLogout={handleLogout} />;
-  //   }
-
-  //   if (currentUser?.type === 'admin') {
-  //     return <AdminDashboard userName={currentUser.name} onLogout={handleLogout} />;
-  //   }
-  // }
 
   // Show landing page
   return (
@@ -138,7 +155,6 @@ export default function App() {
               isOpen={isLoginModalOpen}
               onClose={() => {
                 setIsLoginModalOpen(false);
-                setSelectedPlan(null);
                 setLoginTriggeredFromPlan(false);
               }}
               onLogin={handleLogin}
@@ -151,9 +167,9 @@ export default function App() {
       {/* Tutorial */}
       <Route path="/tutorial" element={<Tutorial_Page />} />
 
-      {/* Checkout */}
+      {/* Checkout with User ID in URL */}
       <Route
-        path="/checkout"
+        path="/checkout/:userId"
         element={
           selectedPlan ? (
             <CheckoutPage
@@ -162,8 +178,35 @@ export default function App() {
               onBack={handleBackToPricing}
             />
           ) : (
-            <div className="p-10 text-center">No plan selected</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">No plan selected</h2>
+                <p className="text-gray-600 mb-4">Please select a plan from our pricing page</p>
+                <button
+                  onClick={() => navigate("/")}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Go to Pricing
+                </button>
+              </div>
+            </div>
           )
+        }
+      />
+
+      {/* Fallback redirect for old /checkout route */}
+      <Route
+        path="/checkout"
+        element={
+          (() => {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              const userId = user.customerId;
+              return <Navigate to={`/checkout/${userId}`} replace />;
+            }
+            return <Navigate to="/" replace />;
+          })()
         }
       />
 

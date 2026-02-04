@@ -74,7 +74,7 @@ export function BecomePartnerPage({
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#002855] to-[#0066CC] text-white py-20 md:py-32">
+      <section className="relative bg-[#00C4CC] text-white py-20 md:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -82,7 +82,7 @@ export function BecomePartnerPage({
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ fontWeight: 700 }}>
               Become a Workeye Partner
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
@@ -96,12 +96,12 @@ export function BecomePartnerPage({
       <div className="bg-[#00BCD4] sticky top-[88px] z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center">
-            <div className="flex-1 md:flex-none px-8 py-4 text-center bg-white text-[#002855] font-medium border-b-4 border-white">
+            <div className="flex-1 md:flex-none px-8 py-4 text-center bg-white text-[#002855] font-medium border-b-4 border-white" style={{ fontWeight: 600 }}>
               Become a partner
             </div>
             <Link
               to="/partners"
-              className="flex-1 md:flex-none px-8 py-4 text-center text-black hover:bg-white/10 transition-colors font-medium border-b-4 border-transparent hover:border-white"
+              className="flex-1 md:flex-none px-8 py-4 text-center text-black hover:bg-white/10 transition-colors font-medium border-b-4 border-transparent hover:border-white" style={{ fontWeight: 600 }}
             >
               Partner directory
             </Link>
@@ -320,7 +320,6 @@ function ApplicationForm() {
         source: "workeye",
       };
 
-      console.log("Submitting partner application:", payload);
 
       await submitPartnerApplication(payload);
 
@@ -532,7 +531,7 @@ function ApplicationForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="partnerType" className="block text-sm font-medium text-[#002855] mb-2">
-                  Partner Type *
+                  Join As *
                 </label>
                 <select
                   id="partnerType"
@@ -543,11 +542,11 @@ function ApplicationForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00BCD4] focus:border-transparent outline-none transition-all"
                 >
                   <option value="">Select type</option>
-                  <option value="reseller">Reseller Partner</option>
+                  <option value="reseller">Channel Partner</option>
                   <option value="distributor">Distributor</option>
-                  <option value="implementation">Implementation Partner</option>
+                  {/* <option value="implementation">Implementation Partner</option>
                   <option value="technology">Technology Partner</option>
-                  <option value="referral">Referral Partner</option>
+                  <option value="referral">Referral Partner</option> */}
                 </select>
               </div>
 

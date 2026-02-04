@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Menu, X, User, LogOut, ChevronDown, LayoutDashboard } from "lucide-react";
 import { Button } from "./ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import logoImage from "./assets/workeye.jpg";
@@ -25,6 +25,100 @@ export function Navbar({
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    email: string;
+  } | null>(null);
+  const [hasActiveLicense, setHasActiveLicense] = useState(false);
+  const [isCheckingLicense, setIsCheckingLicense] = useState(false);
+  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check for active license
+  const checkActiveLicense = async (email: string): Promise<boolean> => {
+    try {
+      setIsCheckingLicense(true);
+      
+      const response = await fetch(
+        `https://lisence-system.onrender.com/api/external/actve-license/${email}?productId=69589e3fe70228ef3c25f26c`,
+        {
+          headers: {
+            "x-api-key": "my-secret-key-123",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const hasLicense = data.activeLicense && data.activeLicense.status === 'active';
+        setHasActiveLicense(hasLicense);
+        return hasLicense;
+      }
+      setHasActiveLicense(false);
+      return false;
+    } catch (error) {
+      console.error("Error checking active license:", error);
+      setHasActiveLicense(false);
+      return false;
+    } finally {
+      setIsCheckingLicense(false);
+    }
+  };
+
+  // Check for logged-in user on mount and whenever localStorage changes
+  useEffect(() => {
+    const checkUser = () => {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setCurrentUser(user);
+          // Check license status when user is detected
+          if (user.email) {
+            checkActiveLicense(user.email);
+          }
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          setCurrentUser(null);
+          setHasActiveLicense(false);
+        }
+      } else {
+        setCurrentUser(null);
+        setHasActiveLicense(false);
+      }
+    };
+
+    checkUser();
+    
+    // Listen for storage changes (in case user logs in from another tab)
+    window.addEventListener("storage", checkUser);
+    
+    // Listen for custom login event
+    window.addEventListener("userLoggedIn", checkUser);
+    
+    return () => {
+      window.removeEventListener("storage", checkUser);
+      window.removeEventListener("userLoggedIn", checkUser);
+    };
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   const handleLogoClick = () => {
     if (onLogoClick) {
@@ -38,7 +132,6 @@ export function Navbar({
     setIsMobileMenuOpen(false);
 
     if (type === "route") {
-      // Clear any existing hash before routing
       window.history.replaceState(null, "", href);
       navigate(href, { replace: true });
       return;
@@ -57,6 +150,42 @@ export function Navbar({
         behavior: "smooth",
       });
     }
+  };
+
+  const handleDashboardClick = () => {
+    setIsProfileDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    // Redirect to external dashboard
+    window.location.href = "https://frontend-8x7e.onrender.com/";
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("user");
+    setCurrentUser(null);
+    setHasActiveLicense(false);
+    setIsProfileDropdownOpen(false);
+    navigate("/");
+    
+    // Dispatch a custom event to notify other components
+    window.dispatchEvent(new Event("userLoggedOut"));
+  };
+
+  const handleLoginClick = () => {
+    // Check if user is already logged in
+    if (currentUser) {
+      alert("You are already logged in!");
+      return;
+    }
+    onLoginClick();
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const navLinks: NavLink[] = [
@@ -112,12 +241,69 @@ export function Navbar({
                 <span className="text-xs text-gray-500">We work 24/7</span>
               </div>
 
-              <Button
-                onClick={onLoginClick}
-                className="bg-[#003366] hover:bg-[#002244] text-white px-6 py-2 rounded-md font-medium"
-              >
-                Login
-              </Button>
+              {/* User Profile or Login Button */}
+              {currentUser ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    aria-label="User menu"
+                  >
+                    {/* Profile Avatar - Updated to match reference image */}
+                    <div className="w-10 h-10 rounded-full bg-[#0066CC] flex items-center justify-center text-white font-semibold text-base shadow-sm">
+                      {getInitials(currentUser.name)}
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown Menu - Updated styling to match reference */}
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                      {/* User Info */}
+                      <div className="px-4 py-3">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-12 h-12 rounded-full bg-[#0066CC] flex items-center justify-center text-white font-semibold text-base shadow-sm">
+                            {getInitials(currentUser.name)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{currentUser.email}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dashboard - Only show if user has active license */}
+                      {hasActiveLicense && (
+                        <button
+                          onClick={handleDashboardClick}
+                          className="w-full px-4 py-3 text-left text-sm font-medium text-[#1e3a5f] hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>Dashboard</span>
+                        </button>
+                      )}
+
+                      {/* Sign Out */}
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full px-4 py-3 text-left text-sm font-medium
+                                  hover:bg-red-50 flex items-center gap-3 transition-colors"
+                        style={{ color: '#dc2626' }}
+                      >
+                        <LogOut className="w-4 h-4" style={{ color: '#dc2626' }} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  onClick={handleLoginClick}
+                  className="bg-[#003366] hover:bg-[#002244] text-white px-6 py-2 rounded-md font-medium"
+                >
+                  Login
+                </Button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -147,12 +333,49 @@ export function Navbar({
                   {link.name}
                 </button>
               ))}
-              <Button
-                onClick={onLoginClick}
-                className="w-full bg-[#003366] text-white"
-              >
-                Login
-              </Button>
+              
+              {/* Mobile User Profile */}
+              {currentUser ? (
+                <div className="pt-4 border-t border-gray-200 space-y-3">
+                  <div className="flex items-center gap-3 px-2">
+                    <div className="w-10 h-10 rounded-full bg-[#0066CC] flex items-center justify-center text-white font-semibold text-base shadow-sm">
+                      {getInitials(currentUser.name)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{currentUser.name}</p>
+                      <p className="text-xs text-gray-500">{currentUser.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Dashboard Button for Mobile - Only if has license */}
+                  {hasActiveLicense && (
+                    <Button
+                      onClick={handleDashboardClick}
+                      variant="outline"
+                      className="w-full justify-start gap-2 text-[#1e3a5f] font-medium"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                  )}
+
+                  <Button
+                    onClick={handleSignOut}
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-[#dc2626] hover:text-[#dc2626] hover:bg-red-50 font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleLoginClick}
+                  className="w-full bg-[#003366] text-white"
+                >
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         )}

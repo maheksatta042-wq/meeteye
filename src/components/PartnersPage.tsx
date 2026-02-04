@@ -153,11 +153,14 @@ export function PartnersPage({
         transition={{ duration: 0.6 }}
         className="relative bg-gradient-to-r from-cyan-400 to-blue-500 text-white py-24"
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-6 h-12">
+          <br></br>
+          <br></br>
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
+            
             className="text-5xl md:text-6xl mb-6"
           >
             Find a Workeye Partner in your area!
@@ -303,7 +306,7 @@ export function PartnersPage({
             transition={{ delay: 0.8, duration: 0.6 }}
             className="mt-16 text-center"
           >
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg p-12 text-white">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-500 rounded-lg p-12 text-white ">
               <Users className="w-16 h-16 mx-auto mb-6" />
               <h3 className="text-3xl mb-4">
                 Interested in becoming a partner?

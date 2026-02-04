@@ -268,6 +268,21 @@ For security questions or to report issues, contact: security@workeye.com`,
           <div className="text-center text-gray-500 text-xs sm:text-sm mt-6">
             <p>&copy; {new Date().getFullYear()} WorkEye. All rights reserved.</p>
           </div>
+           {/* Powered by Averlon */}
+        <div className="text-center">
+          <br></br>
+          <p className="text-sm text-white">
+            Powered by{' '}
+            <a 
+              href="https://averlonworld.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:t  ext-cyan-300 font-semibold transition-colors duration-300"
+            >
+              Averlon
+            </a>
+          </p>
+        </div>
         </div>
       </footer>
 
