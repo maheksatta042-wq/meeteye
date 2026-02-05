@@ -19,6 +19,7 @@ import Tutorial_Page from "./components/Tutorial_Page";
 import { PartnerDashboard } from "./components/PartnerDashboard";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { BecomePartnerPage } from "./components/BecomePartnerPage";
+import { ContactSupportPage } from "./components/ContactSupportPage";
 
 type ViewState = "landing" | "checkout" | "dashboard";
 
@@ -68,11 +69,17 @@ export default function App() {
     // Check if user is already logged in
     const userStr = localStorage.getItem("user");
     if (userStr) {
-      // User is logged in, go directly to checkout with user ID
       const user = JSON.parse(userStr);
       const userId = user.customerId;
+      
+      if (!userId) {
+        alert("User ID not found. Please login again.");
+        setIsLoginModalOpen(true);
+        return;
+      }
+      
       navigate(`/checkout/${userId}`);
-    } else {
+    }else {
       // User not logged in, show login modal
       setLoginTriggeredFromPlan(true);
       setIsLoginModalOpen(true);
@@ -84,14 +91,19 @@ export default function App() {
     setCurrentUser({ type, name });
 
     // If login was triggered from plan selection, navigate to checkout with user ID
-    if (loginTriggeredFromPlan) {
+      if (loginTriggeredFromPlan) {
       setLoginTriggeredFromPlan(false);
       
-      // Get user from localStorage to extract ID
       const userStr = localStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
         const userId = user.customerId;
+        
+        if (!userId) {
+          alert("User ID not found. Please login again.");
+          return;
+        }
+        
         navigate(`/checkout/${userId}`);
       }
     }
@@ -243,6 +255,16 @@ export default function App() {
                 }
               }, 100);
             }}
+          />
+        }
+      />
+
+      {/* Contact Support Page */}
+      <Route
+        path="/contact-support"
+        element={
+          <ContactSupportPage
+            onBack={() => navigate("/")}
           />
         }
       />

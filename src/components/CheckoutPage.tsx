@@ -274,7 +274,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
       }
 
       const order = await createOrder({
-        userId: purchaseRes.userId,
+        userId: userId || purchaseRes.userId,
         licenseId,
         billingCycle,
         amount: amountInPaise,

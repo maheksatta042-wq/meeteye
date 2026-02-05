@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface FAQ {
   question: string;
@@ -14,6 +15,7 @@ interface FAQCategory {
 }
 
 export function FAQSection() {
+    const navigate = useNavigate();
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [openQuestions, setOpenQuestions] = useState<{ [key: string]: number | null }>({});
 
@@ -241,12 +243,12 @@ export function FAQSection() {
             Our support team is here to help you understand how WorkEye can transform your workforce management
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="mailto:support@workeye.com"
+            <button
+              onClick={() => window.location.href = '/contact-support'}
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#003366] rounded-lg hover:bg-[#00C4CC] hover:text-white transition-colors"
             >
               Contact Support
-            </a>
+            </button>
             <a
               href="#pricing"
               onClick={(e) => {
