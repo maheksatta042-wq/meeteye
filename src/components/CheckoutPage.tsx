@@ -22,7 +22,21 @@ interface CheckoutPageProps {
 
 export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: CheckoutPageProps) {
   const navigate = useNavigate();
-  const { userId } = useParams(); // Get userId from URL
+
+  // Get user from localStorage (single declaration)
+  const loggedInUser: {
+    name?: string;
+    email?: string;
+    customerId?: string;
+  } = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Redirect to login if no user found
+  useEffect(() => {
+    if (!loggedInUser?.email || !loggedInUser?.customerId) {
+      alert("Please login to continue.");
+      navigate("/");
+    }
+  }, [navigate]);
   
   type BillingCycle = "monthly" | "quarterly" | "half-yearly" | "yearly";
   
@@ -46,11 +60,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     pincode: '',
     gstNumber: '',
   });
-
-  const loggedInUser: {
-    name?: string;
-    email?: string;
-  } = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Pre-fill email from logged in user
   useEffect(() => {
@@ -217,9 +226,10 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     setIsSubmitting(true);
 
     try {
-      if (!loggedInUser?.email || !loggedInUser?.name) {
+      if (!loggedInUser?.email || !loggedInUser?.name || !loggedInUser?.customerId) {
         alert("Session expired. Please login again.");
         setIsSubmitting(false);
+        navigate("/");
         return;
       }
 
@@ -274,7 +284,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
       }
 
       const order = await createOrder({
-        userId: userId || purchaseRes.userId,
+        userId: loggedInUser.customerId,
         licenseId,
         billingCycle,
         amount: amountInPaise,
@@ -378,8 +388,6 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go Back
           </Button>
-          
-          
         </div>
       </div>
 
@@ -432,7 +440,7 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                           onChange={handleInputChange}
                           required
                           readOnly
-                          placeholder="iiiiik@gmail.com"
+                          placeholder="your@email.com"
                           className="w-full px-4 py-2.5 border border-gray-300 bg-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                         />
                       </div>

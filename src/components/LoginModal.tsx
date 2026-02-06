@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { syncCustomer, checkCustomerExists, loginCustomer } from "../api/customerSync";
+import { useNavigate } from 'react-router-dom';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function LoginModal({
   onLogin,
   fromPlanSelection = false
 }: LoginModalProps) {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +35,10 @@ export function LoginModal({
     if (fromPlanSelection) {
       onLogin("admin", userName);
       onClose();
+      // Navigate to checkout after a short delay to ensure state is updated
+      setTimeout(() => {
+        navigate('/checkout');
+      }, 100);
       return;
     }
 
@@ -58,24 +64,33 @@ export function LoginModal({
           console.log("Attempting signup...");
           const response = await syncCustomer({ name, email, source: "workeye", password });
           
+          console.log("Signup response:", response);
+
+          // Make sure we have a customerId
+          if (!response?.customerId && !response?.customer?.customerId) {
+            throw new Error("Account has been created please login to continue");
+          }
+
+          const customerId = response.customerId || response.customer?.customerId;
 
           const user = {
             name: name || email.split("@")[0],
             email,
             role: "admin",
-            customerId: response.customerId,
+            customerId: customerId,
           };
 
+          console.log("Saving user to localStorage:", user);
           localStorage.setItem("user", JSON.stringify(user));
 
           alert("Account created successfully! 🎉");
           
-          setIsSubmitting(false); // Reset loading state
+          setIsSubmitting(false);
           handlePostLoginActions(email, user.name);
           return;
         } catch (signupError: any) {
           console.error("Signup error:", signupError);
-          setIsSubmitting(false); // IMPORTANT: Reset loading state
+          setIsSubmitting(false);
           
           if (signupError.response?.data?.message) {
             alert(signupError.response.data.message);
@@ -94,37 +109,46 @@ export function LoginModal({
         console.log("Email exists?", exists);
 
         if (!exists) {
-          setIsSubmitting(false); // Reset loading state
+          setIsSubmitting(false);
           alert("Account not found. Please create an account.");
           setIsSignUp(true);
           return;
         }
 
         // Email exists, now verify password
-   
         const loginResponse = await loginCustomer({ email, password });
 
+        console.log("Login response:", loginResponse);
+
         if (loginResponse.success && loginResponse.customer) {
+          // Make sure we have a customerId
+          if (!loginResponse.customer.customerId && !loginResponse.customer._id) {
+            throw new Error("Customer ID not received from server");
+          }
+
+          const customerId = loginResponse.customer.customerId || loginResponse.customer._id;
+
           const user = {
             name: loginResponse.customer.name,
             email: loginResponse.customer.email,
             role: "admin",
-            customerId: loginResponse.customer.customerId,
+            customerId: customerId,
           };
 
+          console.log("Saving user to localStorage:", user);
           localStorage.setItem("user", JSON.stringify(user));
 
           alert("Login successful! Welcome back, " + user.name + "! 👋");
           
-          setIsSubmitting(false); // Reset loading state
+          setIsSubmitting(false);
           handlePostLoginActions(user.email, user.name);
         } else {
-          setIsSubmitting(false); // Reset loading state
+          setIsSubmitting(false);
           alert("Invalid credentials. Please check your password.");
         }
       } catch (loginError: any) {
         console.error("Login error:", loginError);
-        setIsSubmitting(false); // IMPORTANT: Reset loading state
+        setIsSubmitting(false);
         
         if (loginError.response?.status === 401) {
           alert("Invalid credentials. Incorrect password.");
@@ -139,7 +163,7 @@ export function LoginModal({
 
     } catch (err: any) {
       console.error("General error:", err);
-      setIsSubmitting(false); // IMPORTANT: Always reset loading state
+      setIsSubmitting(false);
       
       if (err.response?.data?.message) {
         alert(err.response.data.message);

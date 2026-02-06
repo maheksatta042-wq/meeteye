@@ -31,6 +31,8 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
       return "SALES_INQUIRY";
     case "billing":
       return "BILLING_QUESTION";
+    case "demo":
+      return "DEMO_REQUEST";
     case "feature":
       return "FEATURE_REQUEST";
     case "bug":
@@ -52,13 +54,10 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
     companyName: formData.company,
 
     inquiryType: mapInquiryType(formData.type),
-    message: `${formData.subject}\n\n${formData.message}`,
+    subject: formData.subject,
+    message: formData.message,
 
-    source: {
-      product: "WORKEYE", // 🔥 change per website
-      website: window.location.hostname,
-      page: window.location.pathname,
-    },
+    source: "WORKEYE", // Just a string now
   };
 
   try {
@@ -297,6 +296,7 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
                       <option value="support">Technical Support</option>
                       <option value="sales">Sales Inquiry</option>
                       <option value="billing">Billing Question</option>
+                      <option value="demo">Demo Request</option>
                       <option value="feature">Feature Request</option>
                       <option value="bug">Bug Report</option>
                       <option value="other">Other</option>

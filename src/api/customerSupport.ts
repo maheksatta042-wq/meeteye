@@ -1,18 +1,14 @@
 import AxiosInstance from "./AxiosInstance";
 
-// ✅ FIX: Updated type to match what frontend actually sends
 export const createCustomerSupport = async (payload: {
   fullName: string;
   email: string;
   phoneNumber?: string;
   companyName?: string;
   inquiryType: string;
+  subject: string;
   message: string;
-  source: {
-    product: "CALLIFO" | "WORKEYE" | "TALLY" | "MEETHUB" | "GEOTRACK" | "OTHER"; // Changed to uppercase
-     website?: string;  // ✅ ADD THIS
-    page?: string;  
-  };
+  source: "CALLIFO" | "WORKEYE" | "TALLY" | "MEETHUB" | "GEOTRACK" | "OTHER";
 }) => {
   const response = await AxiosInstance.post(
     "api/customer-support",
