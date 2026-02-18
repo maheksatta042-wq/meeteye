@@ -47,8 +47,13 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
     pricePerUser: number;
     includedUsers: number;
     planName: string;
+    discountConfig: {             // ✅ ADD THIS
+      monthly: number;
+      quarterly: number;
+      "half-yearly": number;
+      yearly: number;
+    };
   } | null>(null);
-
   // Billing form state
   const [billingForm, setBillingForm] = useState({
     companyName: '',
@@ -162,10 +167,16 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
         }
 
         setPlanDetails({
-          pricePerUser: Number(selectedPlan.price),
-          includedUsers: userCount,
-          planName: selectedPlan.name,
-        });
+        pricePerUser: Number(selectedPlan.price),
+        includedUsers: userCount,
+        planName: selectedPlan.name,
+        discountConfig: matched.licenseType.discountConfig || {   // ✅ ADD THIS
+          monthly: 0,
+          quarterly: 5,
+          "half-yearly": 10,
+          yearly: 20,
+        },
+      });
       } catch (err) {
         console.error("Failed to load plan details", err);
       } finally {
@@ -190,12 +201,11 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   };
 
   const calculateDiscount = () => {
-    const subtotal = calculateSubtotal();
-    if (billingCycle === "quarterly") return subtotal * 0.05;
-    if (billingCycle === "half-yearly") return subtotal * 0.10;
-    if (billingCycle === "yearly") return subtotal * 0.20;
-    return 0;
-  };
+  if (!planDetails) return 0;
+  const subtotal = calculateSubtotal();
+  const discountPct = planDetails.discountConfig?.[billingCycle] ?? 0;
+  return subtotal * (discountPct / 100);
+};
 
   const calculateTax = () => {
     const subtotalAfterDiscount = calculateSubtotal() - calculateDiscount();
@@ -351,11 +361,9 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
   };
 
   const getDiscountText = () => {
-    if (billingCycle === "quarterly") return "5%";
-    if (billingCycle === "half-yearly") return "10%";
-    if (billingCycle === "yearly") return "20%";
-    return "";
-  };
+  const pct = planDetails?.discountConfig?.[billingCycle] ?? 0;
+  return pct > 0 ? `${pct}%` : "";
+};
 
   const getBillingLabel = () => {
     if (billingCycle === "quarterly") return "Quarterly";
@@ -595,9 +603,9 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                   <div className="space-y-2">
                     {[
                       { value: 'monthly', label: 'Monthly', discount: '' },
-                      { value: 'quarterly', label: 'Quarterly', discount: '-5%' },
-                      { value: 'half-yearly', label: 'Half-Yearly', discount: '-10%' },
-                      { value: 'yearly', label: 'Yearly', discount: '-20%' },
+                      { value: 'quarterly', label: 'Quarterly', discount: planDetails?.discountConfig?.quarterly ? `-${planDetails.discountConfig.quarterly}%` : '' },
+                      { value: 'half-yearly', label: 'Half-Yearly', discount: planDetails?.discountConfig?.['half-yearly'] ? `-${planDetails.discountConfig['half-yearly']}%` : '' },
+                      { value: 'yearly', label: 'Yearly', discount: planDetails?.discountConfig?.yearly ? `-${planDetails.discountConfig.yearly}%` : '' },
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -644,10 +652,14 @@ export function CheckoutPage({ selectedPlan, onPaymentComplete, onBack }: Checko
                   </div>
                   {getDiscountText() && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-green-600">GST (18%)</span>
-                      <span className="font-medium text-green-600">₹{calculateTax().toFixed(0)}</span>
+                      <span className="text-green-600">Discount ({getDiscountText()})</span>
+                      <span className="font-medium text-green-600">-₹{calculateDiscount().toFixed(0)}</span>
                     </div>
                   )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">GST (18%)</span>
+                    <span className="font-medium text-gray-900">₹{calculateTax().toFixed(0)}</span>
+                  </div>
                 </div>
 
                 {/* Total */}

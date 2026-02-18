@@ -29,6 +29,12 @@ interface UIPlan {
   features: Record<string, number | boolean>;
   isFree: boolean;
   isEnterprise: boolean;
+  discountConfig: {           
+    monthly: number;
+    quarterly: number;
+    "half-yearly": number;
+    yearly: number;
+  };
 }
 
 /* ------------------------------------
@@ -71,13 +77,13 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
   const getPrice = (plan: UIPlan) => {
-    if (plan.isFree) return plan.basePrice;
-
-    if (billingCycle === "monthly") return plan.basePrice;
-    if (billingCycle === "quarterly") return (plan.basePrice * 3 * 0.95); // 5% discount
-    if (billingCycle === "half-yearly") return (plan.basePrice * 6 * 0.90); // 10% discount
-    return (plan.basePrice * 12 * 0.8); // 20% discount
+  if (plan.isFree) return plan.basePrice;
+  const months: Record<BillingCycle, number> = {
+    monthly: 1, quarterly: 3, "half-yearly": 6, yearly: 12,
   };
+  const discountPct = plan.discountConfig?.[billingCycle] ?? 0;
+  return plan.basePrice * months[billingCycle] * (1 - discountPct / 100);
+};
 
   const getBillingText = () => {
     if (billingCycle === "monthly") return "/user/month";
@@ -87,11 +93,11 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
   };
 
   const getDiscountText = () => {
-    if (billingCycle === "quarterly") return "Save 5%";
-    if (billingCycle === "half-yearly") return "Save 10%";
-    if (billingCycle === "yearly") return "Save 20%";
-    return "";
-  };
+  const referencePlan = plans.find(p => !p.isFree && !p.isEnterprise);
+  const pct = referencePlan?.discountConfig?.[billingCycle] ?? 0;
+  return pct > 0 ? `Save ${pct}%` : "";
+};
+
 
   const handlePlanClick = (plan: UIPlan) => {
     if (plan.isEnterprise) {
@@ -152,6 +158,12 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
               gradient: uiMeta.gradient || "from-gray-500 to-gray-600",
               isFree: priceAmount === 0,
               isEnterprise: key === "enterprise",
+               discountConfig: lic.licenseType.discountConfig || {   
+                  monthly: 0,
+                  quarterly: 5,
+                  "half-yearly": 10,
+                  yearly: 20,
+                },
               features: (lic.licenseType.features || []).reduce(
                 (acc: Record<string, number | boolean>, f: any) => {
                   // LMS v2 (feature registry based)
@@ -218,21 +230,22 @@ export function PricingSection({ onPlanSelect }: PricingSectionProps) {
             className="w-fit mx-auto mt-8"
           >
             <TabsList className="inline-flex h-auto p-1">
-              <TabsTrigger value="monthly" className="px-4 py-2">
-                Monthly
-              </TabsTrigger>
-              <TabsTrigger value="quarterly" className="px-4 py-2">
-                Quarterly{" "}
-                <span className="ml-1 text-xs text-emerald-600 font-medium">-5%</span>
-              </TabsTrigger>
-              <TabsTrigger value="half-yearly" className="px-4 py-2">
-                Half-Yearly{" "}
-                <span className="ml-1 text-xs text-emerald-600 font-medium">-10%</span>
-              </TabsTrigger>
-              <TabsTrigger value="yearly" className="px-4 py-2">
-                Yearly{" "}
-                <span className="ml-1 text-xs text-emerald-600 font-medium">-20%</span>
-              </TabsTrigger>
+                {(["monthly", "quarterly", "half-yearly", "yearly"] as BillingCycle[]).map((cycle) => {
+                  const refPlan = plans.find(p => !p.isFree && !p.isEnterprise);
+                  const pct = refPlan?.discountConfig?.[cycle] ?? 0;
+                  const labels: Record<string, string> = {
+                    monthly: "Monthly",
+                    quarterly: "Quarterly",
+                    "half-yearly": "Half-Yearly",
+                    yearly: "Yearly",
+                  };
+                  return (
+                    <TabsTrigger key={cycle} value={cycle} className="px-4 py-2">
+                      {labels[cycle]}{" "}
+                      {pct > 0 && <span className="ml-1 text-xs text-emerald-600 font-medium">-{pct}%</span>}
+                    </TabsTrigger>
+                  );
+                })}
             </TabsList>
           </Tabs>
         </motion.div>
