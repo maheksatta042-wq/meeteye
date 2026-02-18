@@ -37,6 +37,8 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
       return "FEATURE_REQUEST";
     case "bug":
       return "BUG_REPORT";
+    case "custom":
+      return "ENTERPRISE_CUSTOM_PLAN";
     default:
       return "OTHER";
   }
@@ -57,7 +59,7 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
     subject: formData.subject,
     message: formData.message,
 
-    source: "WORKEYE", // Just a string now
+    source: "WORKEYE" as const,
   };
 
   try {
@@ -299,6 +301,7 @@ export function ContactSupportPage({ onBack }: ContactSupportPageProps) {
                       <option value="demo">Demo Request</option>
                       <option value="feature">Feature Request</option>
                       <option value="bug">Bug Report</option>
+                      <option value="custom">Enterprise Custom Plan</option>
                       <option value="other">Other</option>
                     </select>
                   </div>

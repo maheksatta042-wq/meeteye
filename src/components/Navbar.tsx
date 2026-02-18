@@ -382,10 +382,12 @@ export function Navbar({
       </nav>
 
       {/* BLUE ANNOUNCEMENT BAR */}
-      <div className="bg-[#003366] text-white text-center py-2 text-sm font-medium">
-        Empowering Businesses with Strength, Backed by Reliability, and Grounded
-        in Stability.
-      </div>
+      {location.pathname === "/" && (
+        <div className="bg-[#003366] text-white text-center py-2 text-sm font-medium">
+          Empowering Businesses with Strength, Backed by Reliability, and Grounded
+          in Stability.
+        </div>
+      )}
     </header>
   );
 }
